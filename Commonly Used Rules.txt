@@ -1,0 +1,15 @@
+Commonly used RULES
+-------------------
+1. Customization Rule
+2. Correlation Rule
+3. Creation Rule
+
+Connector specific rules
+-------------------------
+4. Build Map Rule
+5. Merge Map Rule
+6. Map To Resource Object Rule
+7. Pre-Iterate Rule
+8. Postiterate Rule
+
+
