@@ -1,15 +1,35 @@
 Commonly used RULES
 -------------------
-1. Customization Rule
-2. Correlation Rule
-3. Creation Rule
+1. Customization Rule - This rule type tells IIQ how to perform a certain customization to the aggregated data, 
+			such as taking all the columns associated with entitlements and converting them into one entitlement string attribute.
+
+2. Correlation Rule   - This rule type is used to define identity correlation for applications whose accounts cannot be correlated to Identities 
+			through a simple attribute match in a correlation configuration
+
+3. Creation Rule      - This rule type can be used to perform a variety of functions, such as setting an identity’s password, 
+		   	changing the name of aggregated identities, or setting an attribute to all caps.
 
 Connector specific rules
 -------------------------
-4. Build Map Rule
-5. Merge Map Rule
-6. Map To Resource Object Rule
-7. Pre-Iterate Rule
-8. Postiterate Rule
+4. Build Map Rule     - Perform data manipulation on the delimited file account data as it is read from the file.
+
+5. Merge Map Rule     - This rule is an alternative to the merging configuration.  
+		    	If more complex logic is required for record merging than a basic index-column-match algorithm, this rule can be used.
+
+6. Map To Resource 
+	Object Rule   - This is a rule hook available for data manipulation of the account data as each record is processed.  This rule is run 
+			after any record merging configured for the application has occurred. Without a map to resourceObject rule present, 
+			IdentityIQ will automatically translate a record’s hashmap representation into a resourceObject representation; 
+			this rule allows customers to manipulate data during that transformation process.
+
+7. Pre-Iterate Rule   - This rule runs only once for the whole file before the records in the file are processed. 
+		        Examples include unzipping the file, validating the file date before aggregating potentially 
+		        stale data, building a local map of lookup data from a remote source which can be used in the 
+		        aggregation process, etc.
+
+8. Postiterate Rule   - This rule runs once for the whole file after the records in the file are processed. 
+		      	Examples include deleting or archiving the file, clearing the local map of lookup data, 
+		      	validating counts of records processed, etc.
+
 
 
