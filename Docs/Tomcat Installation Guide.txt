@@ -1,0 +1,13 @@
+Pre-requisites for installing Apacahe Tomcat
+---------------------------------------------
+JAVA JDK and JRE should be installed and the environment variables JAVA_HOME, JRE_HOME and Path should be configured.
+
+
+Installing Apache Tomcat 8.5
+----------------------------
+1. Google search for apache tomcat and then click on the link "tomcat.apache.org".
+2. On the left hand side of the tomcat.apache.org home page, under the downloads category, click on the Tomcat version 8.
+3. Navigate to "8.5.54 -> Binary Distributions -> Core " and click on "32-bit/64-bit Windows Service Installer (pgp, sha512)".
+4. Save the.exe file in the necessary location.
+5. Run the .exe file and complete the installation process.
+6. After the installation process is finished, click on finish.

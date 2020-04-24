@@ -1,0 +1,99 @@
+SailPoint Context is used to :
+
+- Search and retrieve objects.
+- View System Data.
+- Transaction and Data Management.
+
+Methods
+--------
+1. getObjects
+2. search
+3. getObjectByName, getObjectById, getObject
+
+
+a) List<SailPoint Object> getObjects(class, queryOptions)
+Class - Object Class
+queryOptions - Search Criteria
+
+Examples:
+---------
+1. List apps = context.getObjects(Application.class);
+2. List identities = context.getObjects(Identity.class,qo);
+
+
+b) Iterator<SailPoint Object> search(class, queryOptions)
+   Iterator<Object[]> search(class, queryOptions, properties)
+
+Class - Object Class
+queryOptions - Search Criteria
+properties - desired attributes
+
+Examples:
+---------
+1. Iterator apps = context.search(Application.class, qo);
+2. Iterator users = context.search(Identity.class,qo, "name, status");
+3. Iterator users = context.search(Identity.class,qo, props);
+
+
+getObjectByName, getObjectById, getObject
+-----------------------------------------
+-> Identity id = context.getObjectByName(Identity.class, "Bob.Smith");
+-> Application app = context.getObjectById(Application.class, "ff099835353533a959356a565548573a973");
+-> Bundle role = context.getObject(Bundle.class, roleName);
+
+
+Projection Query + Single Object Retrieval
+------------------------------------------
+List props = new ArrayList();
+props.add("name");
+Iterator users = context.search(Identity.class, qo, props);
+
+if(null != users)
+{
+	while(users.hasNext())
+	{
+		String name = users.next()[0];
+		Identity id = context.getObjectByName(Identity.class, name);
+	}
+}
+
+
+Counting Objects
+----------------
+
+int countObjects(cass, queryOptions)
+
+int count = context.countObjects(Identity.class, qo);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
