@@ -1,0 +1,25 @@
+Detailed Architechture Overview
+-------------------------------
+
+Application Server
+------------------
+IIQ Application
+
+- SCIM
+- REST
+- API
+- UI
+- Tasks
+- Workflows
+- Quartz Scheduler
+- Application Connectors
+- Integration Modules
+- Email
+- Hibernate
+
+Database Management System
+--------------------------
+Hiberate is used to connect the application server with RDBMS.
+
+- IIQ tables
+- Object Model
