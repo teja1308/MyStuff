@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rulelanguage="beanshell"name="Test Custom Object Rule">
+	<Source>
+		import sailpoint.object.Identity;
+		import sailpoint.object.Custom;
+		import java.util.*;
+		import java.io.*;
+
+		Map hashMap = new HashMap();
+		List valueList = new ArrayList();
+
+		String line = "";
+		BufferedReader br = new BufferedReader(new FileReader("D:\\Root\\Others\\Softwares\\IIQ\\IIQ Data\\DemoFile.csv"));
+
+		try{
+		//parsing a CSV file into BufferedReader class constructor
+			while ((line = br.readLine()) != null){ //returns a Boolean value
+				String[] data = line.split(",");
+
+				if(hashMap.containsKey(data[0])){
+					valueList = new ArrayList();
+					hashMap.put(data[0],valueList);
+				}
+				else{
+					valueList.add(data[1]);
+					valueList.add(data[2]);
+					hashMap.put(data[0],valueList);
+				}
+			}
+		} 
+		catch (IOException e){
+			e.printStackTrace();
+		}
+
+		Custom cust = new Custom();
+		cust.setName("Test Custom Object");
+		cust.put("data",hashMap);
+		
+		context.saveObject(cust);
+		context.commitTransaction();
+	</Source>
+</Rule>
