@@ -1,204 +1,286 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Home Pantry</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>
+  /* Layout: single column app shell — sticky tab header, summary tiles, then a grouped stock list */
   :root {
-    --bg: #f7f6f2; --card: #ffffff; --text: #1f2421; --muted: #6b726d;
-    --border: #e3e1da; --accent: #2f7d5b; --accent-ink: #ffffff;
-    --warn: #b7791f; --warn-bg: #fdf3e1; --danger: #c0392b; --danger-bg: #fbe9e7;
+    --bg: #f3f5f1; --surface: #ffffff; --fg: #1c231f; --muted: #66706a; --line: #dde3dc;
+    --accent: #2c6e4f; --accent-ink: #ffffff; --accent-soft: #e2efe7;
+    --warn: #8a5a00; --warn-bg: #fbefd5; --bad: #b3261e; --bad-bg: #fbe4e1;
+    --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+    --body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
   }
   @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #141715; --card: #1d211f; --text: #e8ebe9; --muted: #9aa39e;
-      --border: #2e3431; --accent: #4fb386; --accent-ink: #0d1a14;
-      --warn: #e8b04e; --warn-bg: #3a2e17; --danger: #ef7a6c; --danger-bg: #3d1f1b;
+    :root:not([data-theme="light"]) {
+      --bg: #121614; --surface: #1b201d; --fg: #e6ebe7; --muted: #9aa59f; --line: #2c3430;
+      --accent: #5cbf8c; --accent-ink: #0b1a12; --accent-soft: #1f3329;
+      --warn: #f0c060; --warn-bg: #3a2f14; --bad: #f28b80; --bad-bg: #3d1d1a; color-scheme: dark;
     }
   }
+  :root[data-theme="dark"] {
+    --bg: #121614; --surface: #1b201d; --fg: #e6ebe7; --muted: #9aa59f; --line: #2c3430;
+    --accent: #5cbf8c; --accent-ink: #0b1a12; --accent-soft: #1f3329;
+    --warn: #f0c060; --warn-bg: #3a2f14; --bad: #f28b80; --bad-bg: #3d1d1a; color-scheme: dark;
+  }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text);
-    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  header { position: sticky; top: 0; z-index: 2; background: var(--bg);
-    border-bottom: 1px solid var(--border); padding: 12px 16px 0; }
-  h1 { font-size: 20px; margin: 0 0 10px; }
-  nav { display: flex; gap: 4px; }
-  nav button { flex: 1; background: none; border: 0; border-bottom: 3px solid transparent;
-    padding: 8px 4px; color: var(--muted); font: inherit; font-weight: 600; cursor: pointer; }
+  body { background: var(--bg); color: var(--fg); font: 15px/1.45 var(--body); }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+  .wrap { max-width: 760px; margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+  header .wrap { padding-block: 14px 0; }
+  h1 { font: 700 22px/1.1 var(--display); margin: 0 0 10px; letter-spacing: -.01em; }
+  h1 small { font: 400 13px var(--body); color: var(--muted); margin-left: 8px; }
+  h3 { font: 600 18px var(--display); margin: 0 0 12px; }
+  nav { display: flex; }
+  nav button { flex: 1; background: none; border: 0; border-bottom: 3px solid transparent; padding: 8px 4px;
+    color: var(--muted); font: 700 14px var(--body); cursor: pointer; }
   nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .badge { display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 4px;
-    border-radius: 9px; background: var(--danger); color: #fff; font-size: 11px; line-height: 18px; }
-  main { max-width: 760px; margin: 0 auto; padding: 16px; }
-  section[hidden] { display: none; }
+  .badge { display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 4px; border-radius: 9px;
+    background: var(--bad); color: var(--surface); font-size: 11px; line-height: 18px; }
+  main .wrap { padding-block: 16px 40px; }
+  section { display: grid; gap: 10px; }
   .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  input, select, button { font: inherit; color: inherit; }
-  input, select { background: var(--card); border: 1px solid var(--border);
-    border-radius: 8px; padding: 8px 10px; min-width: 0; }
-  .btn { background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-    padding: 8px 12px; cursor: pointer; }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
-  .btn.small { padding: 4px 10px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-    padding: 12px; margin-bottom: 8px; }
-  .item { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
-  .item .name { font-weight: 600; }
-  .item .meta { color: var(--muted); font-size: 13px; }
-  .qty { display: flex; align-items: center; gap: 6px; }
-  .qty button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border);
-    background: var(--card); cursor: pointer; font-size: 18px; line-height: 1; }
-  .qty .n { min-width: 56px; text-align: center; font-variant-numeric: tabular-nums; }
-  .tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; margin-left: 6px; }
-  .tag.low { background: var(--warn-bg); color: var(--warn); }
-  .tag.exp { background: var(--danger-bg); color: var(--danger); }
-  .tag.soon { background: var(--warn-bg); color: var(--warn); }
-  .group-title { margin: 18px 0 8px; font-size: 13px; text-transform: uppercase;
-    letter-spacing: .06em; color: var(--muted); }
-  .empty { color: var(--muted); text-align: center; padding: 32px 0; }
-  .link { background: none; border: 0; color: var(--muted); cursor: pointer; text-decoration: underline; padding: 0; font-size: 13px; }
-  .shop-item { display: flex; align-items: center; gap: 10px; }
-  .shop-item input[type=checkbox] { width: 20px; height: 20px; }
-  .shop-item.done .label { text-decoration: line-through; color: var(--muted); }
-  .shop-item .label { flex: 1; }
-  dialog { border: 1px solid var(--border); border-radius: 14px; background: var(--card);
-    color: var(--text); width: min(460px, calc(100vw - 32px)); padding: 16px; }
-  dialog::backdrop { background: rgba(0,0,0,.4); }
-  .form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .form label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
-  .form .full { grid-column: 1 / -1; }
-  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px; text-align: center; cursor: pointer; }
-  .stat b { display: block; font-size: 22px; }
+  .grow { flex: 1 1 160px; min-width: 0; }
+  input, select, textarea, button { font: inherit; color: inherit; }
+  input, select, textarea { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; width: 100%; }
+  .row > select { width: auto; flex: 1 1 140px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; cursor: pointer; white-space: nowrap; }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
+  .btn.danger { color: var(--bad); }
+  .banner { background: var(--accent-soft); border-radius: 10px; padding: 10px 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .banner p { margin: 0; flex: 1 1 200px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 8px; text-align: center; cursor: pointer; }
+  .stat.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .stat b { display: block; font: 700 26px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+  .stat b.bad { color: var(--bad); } .stat b.warn { color: var(--warn); }
   .stat span { font-size: 12px; color: var(--muted); }
-  .grow { flex: 1; }
+  .list { display: grid; gap: 6px; }
+  .group-title { margin: 12px 0 2px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
+  .item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .item .info { cursor: pointer; min-width: 0; }
+  .item .name { font-weight: 700; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .item .meta { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+  .qty { display: flex; align-items: center; gap: 4px; }
+  .qty button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-size: 18px; line-height: 1; }
+  .qty button:hover { border-color: var(--accent); }
+  .qty .n { min-width: 64px; text-align: center; font-variant-numeric: tabular-nums; font-size: 14px; }
+  .tag { padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+  .tag.warn { background: var(--warn-bg); color: var(--warn); }
+  .tag.bad { background: var(--bad-bg); color: var(--bad); }
+  .tag.ex { background: var(--accent-soft); color: var(--accent); }
+  .empty { color: var(--muted); text-align: center; padding: 32px 0; }
+  .shop-item { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .shop-item input { width: 20px; height: 20px; flex: none; accent-color: var(--accent); }
+  .shop-item .label { flex: 1; min-width: 0; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .shop-item.done .label { text-decoration: line-through; color: var(--muted); }
+  .link { background: none; border: 0; color: var(--muted); cursor: pointer; text-decoration: underline; padding: 0; font-size: 13px; }
+  .hint { color: var(--muted); font-size: 13px; margin: 0; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 8px; }
+  .panel b { font-family: var(--display); font-size: 16px; }
+  dialog { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--fg);
+    width: min(460px, calc(100vw - 32px)); padding: 16px; }
+  dialog::backdrop { background: rgb(0 0 0 / .45); }
+  .form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); min-width: 0; }
+  .form .full { grid-column: 1 / -1; }
+  textarea { min-height: 160px; font: 12px/1.4 ui-monospace, Menlo, monospace; resize: vertical; }
+  .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 10px; z-index: 20; max-width: calc(100vw - 32px); }
+  @media (max-width: 420px) { .form { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: no-preference) { .item, .shop-item { transition: border-color .15s; } }
 </style>
-</head>
-<body>
+
 <header>
-  <h1>🥫 Home Pantry</h1>
-  <nav>
-    <button data-tab="stock" class="active">Stock</button>
-    <button data-tab="shop">Shopping <span id="shopBadge" class="badge" hidden></span></button>
-    <button data-tab="settings">Settings</button>
-  </nav>
+  <div class="wrap">
+    <h1>Home Pantry <small id="todayLabel"></small></h1>
+    <nav>
+      <button id="tabStock" data-tab="stock" class="active">Stock</button>
+      <button id="tabShop" data-tab="shop">Shopping <span id="shopBadge" class="badge" hidden></span></button>
+      <button id="tabSettings" data-tab="settings">Settings</button>
+    </nav>
+  </div>
 </header>
 
-<main>
-  <!-- STOCK -->
+<main><div class="wrap">
   <section id="tab-stock">
+    <div id="sampleBanner" class="banner" hidden>
+      <p>These are example items so you can try things out.</p>
+      <button class="btn" id="clearSampleBtn">Clear examples</button>
+    </div>
     <div class="stats">
-      <div class="stat" data-filter="expiring"><b id="statExp">0</b><span>Expiring ≤ 3 days</span></div>
-      <div class="stat" data-filter="low"><b id="statLow">0</b><span>Running low</span></div>
+      <div class="stat" data-filter="expiring"><b id="statExp" class="bad">0</b><span>Expiring in 3 days</span></div>
+      <div class="stat" data-filter="low"><b id="statLow" class="warn">0</b><span>Running low</span></div>
       <div class="stat" data-filter="all"><b id="statAll">0</b><span>Items</span></div>
     </div>
-    <div class="row" style="margin-bottom:8px">
-      <input id="search" class="grow" type="search" placeholder="Search items…">
+    <div class="row">
+      <input id="search" class="grow" type="search" placeholder="Search items">
       <button class="btn primary" id="addBtn">+ Add item</button>
     </div>
     <div class="row">
-      <select id="filterLoc"><option value="">All locations</option></select>
-      <select id="filterStatus">
+      <select id="filterLoc" aria-label="Location"></select>
+      <select id="filterStatus" aria-label="Status">
         <option value="all">All items</option>
-        <option value="expiring">Expiring soon / expired</option>
+        <option value="expiring">Expiring or expired</option>
         <option value="low">Running low</option>
         <option value="out">Out of stock</option>
       </select>
-      <select id="sortBy">
-        <option value="category">Group by category</option>
-        <option value="location">Group by location</option>
-        <option value="expiry">Sort by expiry</option>
-        <option value="name">Sort A–Z</option>
+      <select id="sortBy" aria-label="Sort">
+        <option value="category">By category</option>
+        <option value="location">By location</option>
+        <option value="expiry">By expiry date</option>
+        <option value="name">A to Z</option>
       </select>
     </div>
-    <div id="stockList"></div>
+    <div id="stockList" class="list"></div>
   </section>
 
-  <!-- SHOPPING -->
   <section id="tab-shop" hidden>
-    <form id="shopForm" class="row" style="margin-bottom:12px">
-      <input id="shopInput" class="grow" placeholder="Add to shopping list…" autocomplete="off" list="knownItems">
+    <form id="shopForm" class="row">
+      <input id="shopInput" class="grow" placeholder="Add to shopping list" autocomplete="off" list="knownItems">
       <button class="btn primary">Add</button>
     </form>
-    <datalist id="knownItems"></datalist>
-    <div id="shopList"></div>
-    <div class="row" style="margin-top:12px">
-      <button class="btn" id="restockBtn">Put checked items in pantry</button>
+    <div id="shopList" class="list"></div>
+    <div class="row">
+      <button class="btn primary" id="restockBtn">Move ticked items to pantry</button>
       <button class="btn" id="copyShopBtn">Copy list</button>
     </div>
-    <p class="meta" style="color:var(--muted);font-size:13px">Items at or below their "low" level are added automatically.</p>
+    <p class="hint">Items at or below their low level appear here automatically.</p>
   </section>
 
-  <!-- SETTINGS -->
   <section id="tab-settings" hidden>
-    <div class="card">
+    <div class="panel">
       <b>Backup</b>
-      <p style="color:var(--muted);margin:4px 0 10px">Data is stored only in this browser. Export regularly, or to move to another device.</p>
+      <p class="hint">Your data is saved in this browser only. Copy a backup to move it to another device.</p>
       <div class="row">
-        <button class="btn" id="exportBtn">Export JSON</button>
-        <label class="btn">Import JSON<input id="importFile" type="file" accept="application/json" hidden></label>
-        <button class="btn" id="sampleBtn">Load sample data</button>
+        <button class="btn" id="exportBtn">Copy backup</button>
+        <button class="btn" id="importBtn">Restore backup</button>
+        <button class="btn" id="sampleBtn">Add example items</button>
       </div>
     </div>
-    <div class="card">
+    <div class="panel">
       <b>Locations</b>
-      <p style="color:var(--muted);margin:4px 0 10px">Comma-separated.</p>
+      <p class="hint">Separate with commas.</p>
       <div class="row"><input id="locInput" class="grow"><button class="btn" id="locSave">Save</button></div>
     </div>
-    <div class="card">
-      <b>Danger zone</b>
-      <div class="row" style="margin-top:8px"><button class="btn" id="wipeBtn" style="color:var(--danger)">Delete all data</button></div>
+    <div class="panel">
+      <b>Reset</b>
+      <div class="row"><button class="btn danger" id="wipeBtn">Delete all data</button></div>
     </div>
   </section>
-</main>
+</div></main>
 
 <dialog id="itemDialog">
-  <form method="dialog" id="itemForm">
-    <h3 id="dialogTitle" style="margin:0 0 12px">Add item</h3>
+  <form id="itemForm">
+    <h3 id="dialogTitle">Add item</h3>
     <div class="form">
-      <label class="full">Name<input name="name" required list="knownItems" autocomplete="off"></label>
-      <label>Quantity<input name="qty" type="number" min="0" step="any" value="1" required></label>
-      <label>Unit<input name="unit" placeholder="pcs, kg, L…" list="units"></label>
-      <label>Category<input name="category" list="categories" placeholder="e.g. Dairy"></label>
-      <label>Location<select name="location"></select></label>
-      <label>Expiry date<input name="expiry" type="date"></label>
-      <label>Low when ≤<input name="low" type="number" min="0" step="any" placeholder="e.g. 1"></label>
-      <label class="full">Notes<input name="notes"></label>
+      <label class="full">Name<input id="fName" name="name" required list="knownItems" autocomplete="off"></label>
+      <label>Quantity<input id="fQty" name="qty" type="number" min="0" step="any" value="1" required></label>
+      <label>Unit<input id="fUnit" name="unit" placeholder="pcs, kg, L" list="units"></label>
+      <label>Category<input id="fCat" name="category" list="categories" placeholder="Dairy"></label>
+      <label>Location<select id="fLoc" name="location"></select></label>
+      <label>Expiry date<input id="fExp" name="expiry" type="date"></label>
+      <label>Low when at or below<input id="fLow" name="low" type="number" min="0" step="any" placeholder="1"></label>
+      <label class="full">Notes<input id="fNotes" name="notes"></label>
     </div>
     <div class="row" style="margin-top:14px;justify-content:space-between">
-      <button type="button" class="btn" id="deleteItemBtn" style="color:var(--danger)">Delete</button>
+      <button type="button" class="btn danger" id="deleteItemBtn">Delete</button>
       <div class="row">
         <button type="button" class="btn" id="cancelBtn">Cancel</button>
-        <button class="btn primary" value="save">Save</button>
+        <button type="submit" class="btn primary">Save</button>
       </div>
     </div>
   </form>
 </dialog>
-<datalist id="units"><option>pcs</option><option>g</option><option>kg</option><option>ml</option><option>L</option><option>pack</option><option>can</option><option>bottle</option><option>dozen</option></datalist>
+
+<dialog id="confirmDialog">
+  <p id="confirmText" style="margin:0 0 16px"></p>
+  <div class="row" style="justify-content:flex-end">
+    <button class="btn" id="confirmNo">Cancel</button>
+    <button class="btn primary" id="confirmYes">OK</button>
+  </div>
+</dialog>
+
+<dialog id="textDialog">
+  <h3 id="textTitle"></h3>
+  <p class="hint" id="textHint" style="margin-bottom:8px"></p>
+  <textarea id="textArea"></textarea>
+  <div class="row" style="justify-content:flex-end;margin-top:10px">
+    <label class="btn" id="fileLabel" hidden>Choose file<input id="importFile" type="file" accept="application/json,.json" hidden></label>
+    <button class="btn" id="textClose">Close</button>
+    <button class="btn primary" id="textAction"></button>
+  </div>
+</dialog>
+
+<datalist id="knownItems"></datalist>
 <datalist id="categories"></datalist>
+<datalist id="units"><option>pcs</option><option>g</option><option>kg</option><option>ml</option><option>L</option><option>pack</option><option>can</option><option>bottle</option><option>dozen</option></datalist>
 
 <script>
 const KEY = 'pantry.v1';
+const DEFAULT_LOCATIONS = ['Pantry', 'Fridge', 'Freezer'];
 const DEFAULT_CATEGORIES = ['Produce', 'Dairy', 'Meat & Fish', 'Bakery', 'Grains & Pasta', 'Canned', 'Spices', 'Snacks', 'Drinks', 'Frozen', 'Household'];
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmtQty = (n) => Number.isInteger(n) ? n : +n.toFixed(2);
+const isoDay = (offset = 0) => { const x = new Date(); x.setDate(x.getDate() + offset); return x.toLocaleDateString('en-CA'); };
 
+// ---- storage ----
+let firstRun = false;
 let state = load();
 
 function load() {
   try {
     const s = JSON.parse(localStorage.getItem(KEY));
-    if (s && Array.isArray(s.items)) return { locations: ['Pantry', 'Fridge', 'Freezer'], shopping: [], ...s };
+    if (s && Array.isArray(s.items)) return { locations: DEFAULT_LOCATIONS, shopping: [], ...s };
   } catch (e) {}
-  return { items: [], shopping: [], locations: ['Pantry', 'Fridge', 'Freezer'] };
+  firstRun = true;
+  return { items: [], shopping: [], locations: [...DEFAULT_LOCATIONS] };
 }
 function save() {
-  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { alert('Could not save: ' + e.message); }
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Could not save in this browser. Changes last until you close the page.'); }
   render();
 }
 
-// ---- helpers ----
-const $ = (s) => document.querySelector(s);
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const fmtQty = (n) => Number.isInteger(n) ? n : +n.toFixed(2);
+// ---- in-page dialogs (the viewer blocks alert/confirm/prompt) ----
+let toastTimer;
+function toast(msg) {
+  document.querySelector('.toast')?.remove();
+  const t = Object.assign(document.createElement('div'), { className: 'toast', textContent: msg, role: 'status' });
+  document.body.append(t);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.remove(), 3500);
+}
+function ask(text, okLabel = 'OK') {
+  return new Promise(resolve => {
+    const d = $('#confirmDialog');
+    $('#confirmText').textContent = text; $('#confirmYes').textContent = okLabel;
+    $('#confirmYes').onclick = () => { d.close(); resolve(true); };
+    $('#confirmNo').onclick = () => { d.close(); resolve(false); };
+    d.oncancel = () => resolve(false);
+    d.showModal();
+  });
+}
+function textBox({ title, hint, value = '', action, onAction, file = false }) {
+  $('#textTitle').textContent = title; $('#textHint').textContent = hint;
+  $('#textArea').value = value; $('#textAction').textContent = action;
+  $('#fileLabel').hidden = !file;
+  $('#textAction').onclick = () => onAction($('#textArea').value);
+  $('#textDialog').showModal();
+}
+$('#textClose').onclick = () => $('#textDialog').close();
+async function copyText(text, el) {
+  try { await navigator.clipboard.writeText(text); toast('Copied'); }
+  catch (e) { el.focus(); el.select(); toast('Select all and copy manually'); }
+}
+
+// ---- domain ----
 function daysUntil(date) {
   if (!date) return null;
   const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -209,28 +291,25 @@ const isExpiring = (i) => { const d = daysUntil(i.expiry); return d !== null && 
 
 // Shopping list = manual entries + low-stock items not already listed
 function shoppingView() {
-  const manual = state.shopping;
-  const names = new Set(manual.map(s => s.name.toLowerCase()));
+  const names = new Set(state.shopping.map(s => s.name.toLowerCase()));
   const auto = state.items.filter(i => isLow(i) && !names.has(i.name.toLowerCase()))
     .map(i => ({ id: 'auto-' + i.id, name: i.name, auto: true, done: false }));
-  return [...manual, ...auto];
+  return [...state.shopping, ...auto];
 }
 
 // ---- rendering ----
 function render() {
-  // stats
   $('#statExp').textContent = state.items.filter(isExpiring).length;
   $('#statLow').textContent = state.items.filter(isLow).length;
   $('#statAll').textContent = state.items.length;
+  $('#sampleBanner').hidden = !state.items.some(i => i.sample);
 
-  // dropdowns / datalists
   const locSel = $('#filterLoc'), cur = locSel.value;
   locSel.innerHTML = '<option value="">All locations</option>' + state.locations.map(l => `<option ${l === cur ? 'selected' : ''}>${esc(l)}</option>`).join('');
-  $('#itemForm').location.innerHTML = state.locations.map(l => `<option>${esc(l)}</option>`).join('');
+  $('#fLoc').innerHTML = state.locations.map(l => `<option>${esc(l)}</option>`).join('');
   const cats = [...new Set([...DEFAULT_CATEGORIES, ...state.items.map(i => i.category).filter(Boolean)])];
   $('#categories').innerHTML = cats.map(c => `<option>${esc(c)}</option>`).join('');
-  const known = [...new Set(state.items.map(i => i.name))];
-  $('#knownItems').innerHTML = known.map(n => `<option>${esc(n)}</option>`).join('');
+  $('#knownItems').innerHTML = [...new Set(state.items.map(i => i.name))].map(n => `<option>${esc(n)}</option>`).join('');
   $('#locInput').value = state.locations.join(', ');
 
   renderStock();
@@ -242,18 +321,19 @@ function renderStock() {
   const loc = $('#filterLoc').value;
   const status = $('#filterStatus').value;
   const sort = $('#sortBy').value;
+  document.querySelectorAll('.stat').forEach(s => s.classList.toggle('on', s.dataset.filter === status && status !== 'all'));
 
-  let items = state.items.filter(i =>
-    (!q || i.name.toLowerCase().includes(q) || (i.category || '').toLowerCase().includes(q) || (i.notes || '').toLowerCase().includes(q)) &&
+  const items = state.items.filter(i =>
+    (!q || [i.name, i.category, i.notes].some(v => (v || '').toLowerCase().includes(q))) &&
     (!loc || i.location === loc) &&
     (status === 'all' || (status === 'expiring' && isExpiring(i)) || (status === 'low' && isLow(i)) || (status === 'out' && i.qty <= 0)));
 
   const list = $('#stockList');
   if (!state.items.length) {
-    list.innerHTML = `<div class="empty">Your pantry is empty.<br><br><button class="btn primary" onclick="openItem()">Add your first item</button> <button class="btn" onclick="loadSample()">Try sample data</button></div>`;
+    list.innerHTML = `<div class="empty">Your pantry is empty.<br><br><button class="btn primary" onclick="openItem()">Add your first item</button> <button class="btn" onclick="loadSample()">Add example items</button></div>`;
     return;
   }
-  if (!items.length) { list.innerHTML = '<div class="empty">No items match.</div>'; return; }
+  if (!items.length) { list.innerHTML = '<div class="empty">No items match these filters.</div>'; return; }
 
   const byName = (a, b) => a.name.localeCompare(b.name);
   if (sort === 'expiry' || sort === 'name') {
@@ -261,9 +341,8 @@ function renderStock() {
     list.innerHTML = items.map(itemHTML).join('');
     return;
   }
-  const key = sort; // category | location
   const groups = {};
-  items.forEach(i => (groups[i[key] || 'Other'] ??= []).push(i));
+  items.forEach(i => (groups[i[sort] || 'Other'] ??= []).push(i));
   list.innerHTML = Object.keys(groups).sort().map(g =>
     `<div class="group-title">${esc(g)} · ${groups[g].length}</div>` + groups[g].sort(byName).map(itemHTML).join('')).join('');
 }
@@ -271,22 +350,23 @@ function renderStock() {
 function itemHTML(i) {
   const d = daysUntil(i.expiry);
   let tags = '';
-  if (d !== null && d < 0) tags += `<span class="tag exp">expired ${-d}d ago</span>`;
-  else if (d === 0) tags += `<span class="tag exp">expires today</span>`;
-  else if (d !== null && d <= 3) tags += `<span class="tag soon">${d}d left</span>`;
-  if (i.qty <= 0) tags += `<span class="tag exp">out</span>`;
-  else if (isLow(i)) tags += `<span class="tag low">low</span>`;
-  const meta = [i.location, i.category, i.expiry && d > 3 ? 'exp ' + i.expiry : '', i.notes].filter(Boolean).map(esc).join(' · ');
-  const step = (i.unit && /^(g|ml)$/i.test(i.unit)) ? 100 : 1;
-  return `<div class="card item">
-    <div onclick="openItem('${i.id}')" style="cursor:pointer">
+  if (d !== null && d < 0) tags += `<span class="tag bad">expired ${-d}d ago</span>`;
+  else if (d === 0) tags += `<span class="tag bad">expires today</span>`;
+  else if (d !== null && d <= 3) tags += `<span class="tag warn">${d}d left</span>`;
+  if (i.qty <= 0) tags += `<span class="tag bad">out</span>`;
+  else if (isLow(i)) tags += `<span class="tag warn">low</span>`;
+  if (i.sample) tags += `<span class="tag ex">example</span>`;
+  const meta = [i.location, i.category, i.expiry && d > 3 ? 'use by ' + i.expiry : '', i.notes].filter(Boolean).map(esc).join(' · ');
+  const step = /^(g|ml)$/i.test(i.unit || '') ? 100 : 1;
+  return `<div class="item">
+    <div class="info" onclick="openItem('${i.id}')" title="Edit">
       <div class="name">${esc(i.name)}${tags}</div>
       <div class="meta">${meta}</div>
     </div>
     <div class="qty">
-      <button aria-label="less" onclick="bump('${i.id}', -${step})">−</button>
+      <button aria-label="Use ${step}" onclick="bump('${i.id}', -${step})">−</button>
       <span class="n">${fmtQty(i.qty)} ${esc(i.unit || '')}</span>
-      <button aria-label="more" onclick="bump('${i.id}', ${step})">+</button>
+      <button aria-label="Add ${step}" onclick="bump('${i.id}', ${step})">+</button>
     </div>
   </div>`;
 }
@@ -294,17 +374,16 @@ function itemHTML(i) {
 function renderShop() {
   const list = shoppingView();
   const pending = list.filter(s => !s.done).length;
-  const badge = $('#shopBadge');
-  badge.hidden = !pending; badge.textContent = pending;
+  $('#shopBadge').hidden = !pending; $('#shopBadge').textContent = pending;
   $('#shopList').innerHTML = list.length ? list.map(s => `
-    <div class="card shop-item ${s.done ? 'done' : ''}">
+    <label class="shop-item ${s.done ? 'done' : ''}">
       <input type="checkbox" ${s.done ? 'checked' : ''} onchange="toggleShop('${s.id}')">
-      <span class="label">${esc(s.name)}${s.auto ? ' <span class="tag low">low stock</span>' : ''}</span>
-      ${s.auto ? '' : `<button class="link" onclick="removeShop('${s.id}')">remove</button>`}
-    </div>`).join('') : '<div class="empty">Nothing to buy 🎉</div>';
+      <span class="label">${esc(s.name)}${s.auto ? ' <span class="tag warn">low stock</span>' : ''}</span>
+      ${s.auto ? '' : `<button type="button" class="link" onclick="event.preventDefault();removeShop('${s.id}')">Remove</button>`}
+    </label>`).join('') : '<div class="empty">Nothing to buy right now.</div>';
 }
 
-// ---- actions ----
+// ---- stock actions ----
 function bump(id, delta) {
   const i = state.items.find(x => x.id === id);
   i.qty = Math.max(0, +(i.qty + delta).toFixed(3));
@@ -325,7 +404,7 @@ function openItem(id) {
 }
 
 $('#itemForm').addEventListener('submit', (e) => {
-  if (e.submitter?.value !== 'save') return;
+  e.preventDefault();
   const f = e.target;
   const data = {
     name: f.name.value.trim(), qty: Number(f.qty.value) || 0, unit: f.unit.value.trim(),
@@ -333,21 +412,29 @@ $('#itemForm').addEventListener('submit', (e) => {
     low: f.low.value === '' ? '' : Number(f.low.value), notes: f.notes.value.trim(),
   };
   if (!data.name) return;
-  if (editingId) Object.assign(state.items.find(x => x.id === editingId), data);
-  else {
+  if (editingId) {
+    const it = state.items.find(x => x.id === editingId);
+    Object.assign(it, data); delete it.sample;
+    toast('Saved ' + data.name);
+  } else {
     // Merge into an existing item with same name + location + expiry instead of duplicating
     const dup = state.items.find(x => x.name.toLowerCase() === data.name.toLowerCase() && x.location === data.location && (x.expiry || '') === data.expiry);
-    if (dup) dup.qty += data.qty; else state.items.push({ id: uid(), added: new Date().toISOString().slice(0, 10), ...data });
+    if (dup) { dup.qty += data.qty; toast(`Added ${data.qty} to existing ${dup.name}`); }
+    else { state.items.push({ id: uid(), added: isoDay(), ...data }); toast('Added ' + data.name); }
   }
+  $('#itemDialog').close();
   save();
 });
 $('#cancelBtn').onclick = () => $('#itemDialog').close();
-$('#deleteItemBtn').onclick = () => {
-  if (!confirm('Delete this item?')) return;
+$('#deleteItemBtn').onclick = async () => {
+  $('#itemDialog').close();
+  const it = state.items.find(x => x.id === editingId);
+  if (!(await ask(`Delete ${it.name}?`, 'Delete'))) return;
   state.items = state.items.filter(x => x.id !== editingId);
-  $('#itemDialog').close(); save();
+  save(); toast('Deleted ' + it.name);
 };
 
+// ---- shopping actions ----
 function toggleShop(id) {
   if (id.startsWith('auto-')) {
     const item = state.items.find(i => 'auto-' + i.id === id);
@@ -368,73 +455,83 @@ $('#shopForm').addEventListener('submit', (e) => {
   $('#shopInput').value = ''; save();
 });
 
-// Checked items: bump matching pantry item by 1 (or prompt to add it), then remove from list
+// Ticked items: top up the matching pantry item (to its low level, min 1) or create it
 $('#restockBtn').onclick = () => {
   const done = state.shopping.filter(s => s.done);
-  if (!done.length) return alert('Tick the items you bought first.');
-  const unknown = [];
+  if (!done.length) return toast('Tick the items you bought first');
+  let created = 0;
   done.forEach(s => {
     const item = state.items.find(i => i.name.toLowerCase() === s.name.toLowerCase());
     if (item) item.qty = +(item.qty + Math.max(1, Number(item.low) || 0)).toFixed(3);
-    else unknown.push(s.name);
+    else { created++; state.items.push({ id: uid(), name: s.name, qty: 1, unit: '', category: '', location: state.locations[0], expiry: '', low: '', notes: '', added: isoDay() }); }
   });
-  unknown.forEach(name => state.items.push({ id: uid(), name, qty: 1, unit: '', category: '', location: state.locations[0], expiry: '', low: '', notes: '', added: new Date().toISOString().slice(0, 10) }));
   state.shopping = state.shopping.filter(s => !s.done);
   save();
-  alert(`Restocked ${done.length} item(s).` + (unknown.length ? `\nNew items added (edit them to set details): ${unknown.join(', ')}` : '') + '\nTip: update expiry dates on fresh items.');
+  toast(`Restocked ${done.length} item${done.length > 1 ? 's' : ''}` + (created ? `, ${created} new. Set their expiry dates in Stock.` : ''));
 };
-$('#copyShopBtn').onclick = async () => {
-  const text = shoppingView().filter(s => !s.done).map(s => '• ' + s.name).join('\n');
-  try { await navigator.clipboard.writeText(text || '(empty)'); alert('Copied!'); } catch (e) { prompt('Copy this:', text); }
+$('#copyShopBtn').onclick = () => {
+  const text = shoppingView().filter(s => !s.done).map(s => '- ' + s.name).join('\n');
+  if (!text) return toast('Shopping list is empty');
+  copyText(text, $('#shopInput'));
 };
 
 // ---- settings ----
 $('#exportBtn').onclick = () => {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }));
-  a.download = `pantry-${new Date().toISOString().slice(0, 10)}.json`; a.click();
+  const json = JSON.stringify(state, null, 2);
+  textBox({ title: 'Backup', hint: 'Copy this text and keep it somewhere safe, such as a note or email to yourself.', value: json, action: 'Copy', onAction: () => copyText(json, $('#textArea')) });
 };
-$('#importFile').onchange = async (e) => {
-  try {
-    const data = JSON.parse(await e.target.files[0].text());
-    if (!Array.isArray(data.items)) throw new Error('No items array');
-    if (confirm(`Replace current data with ${data.items.length} imported items?`)) { state = { ...load(), ...data }; save(); }
-  } catch (err) { alert('Import failed: ' + err.message); }
-  e.target.value = '';
+$('#importBtn').onclick = () => {
+  textBox({ title: 'Restore backup', hint: 'Paste a backup, or choose a backup file. This replaces your current data.', action: 'Restore', file: true,
+    onAction: async (text) => {
+      try {
+        const data = JSON.parse(text);
+        if (!Array.isArray(data.items)) throw new Error('no items found');
+        $('#textDialog').close();
+        if (!(await ask(`Replace your current data with ${data.items.length} items from the backup?`, 'Replace'))) return;
+        state = { items: [], shopping: [], locations: [...DEFAULT_LOCATIONS], ...data };
+        save(); toast('Backup restored');
+      } catch (err) { toast('That backup could not be read: ' + err.message); }
+    } });
 };
+$('#importFile').onchange = async (e) => { $('#textArea').value = await e.target.files[0].text(); e.target.value = ''; };
 $('#locSave').onclick = () => {
   const locs = $('#locInput').value.split(',').map(s => s.trim()).filter(Boolean);
-  if (locs.length) { state.locations = [...new Set(locs)]; save(); }
+  if (locs.length) { state.locations = [...new Set(locs)]; save(); toast('Locations saved'); }
 };
-$('#wipeBtn').onclick = () => { if (confirm('Delete ALL pantry data? This cannot be undone.')) { state = { items: [], shopping: [], locations: ['Pantry', 'Fridge', 'Freezer'] }; save(); } };
-$('#sampleBtn').onclick = () => loadSample();
+$('#wipeBtn').onclick = async () => {
+  if (await ask('Delete all pantry data? This cannot be undone.', 'Delete all')) {
+    state = { items: [], shopping: [], locations: [...DEFAULT_LOCATIONS] }; save(); toast('All data deleted');
+  }
+};
+$('#sampleBtn').onclick = () => { loadSample(); toast('Example items added'); };
+$('#clearSampleBtn').onclick = () => { state.items = state.items.filter(i => !i.sample); save(); toast('Examples cleared'); };
 
 function loadSample() {
-  const d = (n) => { const x = new Date(); x.setDate(x.getDate() + n); return x.toISOString().slice(0, 10); };
-  const mk = (name, qty, unit, category, location, expiry, low) => ({ id: uid(), name, qty, unit, category, location, expiry, low, notes: '', added: d(0) });
+  const mk = (name, qty, unit, category, location, expiryDays, low) =>
+    ({ id: uid(), name, qty, unit, category, location, expiry: expiryDays == null ? '' : isoDay(expiryDays), low, notes: '', added: isoDay(), sample: true });
   state.items.push(
-    mk('Milk', 1, 'L', 'Dairy', 'Fridge', d(2), 1),
-    mk('Eggs', 4, 'pcs', 'Dairy', 'Fridge', d(10), 6),
-    mk('Basmati rice', 2, 'kg', 'Grains & Pasta', 'Pantry', d(200), 1),
-    mk('Spinach', 1, 'pack', 'Produce', 'Fridge', d(-1), ''),
-    mk('Tomatoes', 6, 'pcs', 'Produce', 'Fridge', d(5), 3),
-    mk('Chickpeas', 3, 'can', 'Canned', 'Pantry', d(400), 2),
-    mk('Frozen peas', 500, 'g', 'Frozen', 'Freezer', d(120), 200),
-    mk('Olive oil', 0, 'bottle', 'Grains & Pasta', 'Pantry', '', 1),
+    mk('Milk', 1, 'L', 'Dairy', 'Fridge', 2, 1),
+    mk('Eggs', 4, 'pcs', 'Dairy', 'Fridge', 10, 6),
+    mk('Basmati rice', 2, 'kg', 'Grains & Pasta', 'Pantry', 200, 1),
+    mk('Spinach', 1, 'pack', 'Produce', 'Fridge', -1, ''),
+    mk('Tomatoes', 6, 'pcs', 'Produce', 'Fridge', 5, 3),
+    mk('Chickpeas', 3, 'can', 'Canned', 'Pantry', 400, 2),
+    mk('Frozen peas', 500, 'g', 'Frozen', 'Freezer', 120, 200),
+    mk('Olive oil', 0, 'bottle', 'Grains & Pasta', 'Pantry', null, 1),
   );
   save();
 }
 
 // ---- tabs & filters ----
-document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
-  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('active', x === b));
-  document.querySelectorAll('main > section').forEach(s => s.hidden = s.id !== 'tab-' + b.dataset.tab);
-});
+function showTab(name) {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('active', x.dataset.tab === name));
+  document.querySelectorAll('main section').forEach(s => s.hidden = s.id !== 'tab-' + name);
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
 document.querySelectorAll('.stat').forEach(s => s.onclick = () => { $('#filterStatus').value = s.dataset.filter; renderStock(); });
 ['#search', '#filterLoc', '#filterStatus', '#sortBy'].forEach(s => $(s).addEventListener('input', renderStock));
 $('#addBtn').onclick = () => openItem();
+$('#todayLabel').textContent = new Date().toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
 
-render();
+if (firstRun) loadSample(); else render();
 </script>
-</body>
-</html>
