@@ -2,107 +2,210 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-  /* Layout: single column app shell — sticky tab header, summary tiles, then a grouped stock list */
+  /* Layout: one quiet column. Items sit on "shelves" (group rules); each item is a jar whose fill shows stock. */
   :root {
-    --bg: #f3f5f1; --surface: #ffffff; --fg: #1c231f; --muted: #66706a; --line: #dde3dc;
-    --accent: #2c6e4f; --accent-ink: #ffffff; --accent-soft: #e2efe7;
-    --warn: #8a5a00; --warn-bg: #fbefd5; --bad: #b3261e; --bad-bg: #fbe4e1;
-    --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
-    --body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --bg: #f6f6f3;        /* shelf paper */
+    --surface: #ffffff;
+    --sunken: #eeefea;
+    --ink: #1b1f1c;
+    --muted: #6e746f;
+    --line: #e2e3dd;
+    --line-strong: #c9ccc4;
+    --basil: #3f6b3a;     /* accent: fresh / in stock */
+    --basil-ink: #ffffff;
+    --basil-soft: #e6eee3;
+    --turmeric: #a86a00;  /* running low / expiring soon */
+    --turmeric-soft: #f8ecd2;
+    --tomato: #c23b2b;    /* expired / out */
+    --tomato-soft: #fae3df;
+    --shadow: 0 1px 2px rgb(27 31 28 / .04), 0 4px 16px rgb(27 31 28 / .04);
+    --sans: "Instrument Sans", "Helvetica Neue", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #121614; --surface: #1b201d; --fg: #e6ebe7; --muted: #9aa59f; --line: #2c3430;
-      --accent: #5cbf8c; --accent-ink: #0b1a12; --accent-soft: #1f3329;
-      --warn: #f0c060; --warn-bg: #3a2f14; --bad: #f28b80; --bad-bg: #3d1d1a; color-scheme: dark;
+      --bg: #121412; --surface: #1a1d1a; --sunken: #232723; --ink: #e9ebe7; --muted: #959b95;
+      --line: #282c28; --line-strong: #3b403b; --basil: #8fc283; --basil-ink: #10200d; --basil-soft: #213020;
+      --turmeric: #e9b44c; --turmeric-soft: #362b14; --tomato: #ef7d6d; --tomato-soft: #3a1e1a;
+      --shadow: 0 1px 2px rgb(0 0 0 / .3); color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #121614; --surface: #1b201d; --fg: #e6ebe7; --muted: #9aa59f; --line: #2c3430;
-    --accent: #5cbf8c; --accent-ink: #0b1a12; --accent-soft: #1f3329;
-    --warn: #f0c060; --warn-bg: #3a2f14; --bad: #f28b80; --bad-bg: #3d1d1a; color-scheme: dark;
+    --bg: #121412; --surface: #1a1d1a; --sunken: #232723; --ink: #e9ebe7; --muted: #959b95;
+    --line: #282c28; --line-strong: #3b403b; --basil: #8fc283; --basil-ink: #10200d; --basil-soft: #213020;
+    --turmeric: #e9b44c; --turmeric-soft: #362b14; --tomato: #ef7d6d; --tomato-soft: #3a1e1a;
+    --shadow: 0 1px 2px rgb(0 0 0 / .3); color-scheme: dark;
   }
+
   * { box-sizing: border-box; }
-  body { background: var(--bg); color: var(--fg); font: 15px/1.45 var(--body); }
+  body { background: var(--bg); color: var(--ink); font: 15px/1.45 var(--sans); -webkit-font-smoothing: antialiased; }
   body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
-  .wrap { max-width: 760px; margin: 0 auto;
+  .wrap { max-width: 680px; margin: 0 auto;
     padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-  header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
-  header .wrap { padding-block: 14px 0; }
-  h1 { font: 700 22px/1.1 var(--display); margin: 0 0 10px; letter-spacing: -.01em; }
-  h1 small { font: 400 13px var(--body); color: var(--muted); margin-left: 8px; }
-  h3 { font: 600 18px var(--display); margin: 0 0 12px; }
-  nav { display: flex; }
-  nav button { flex: 1; background: none; border: 0; border-bottom: 3px solid transparent; padding: 8px 4px;
-    color: var(--muted); font: 700 14px var(--body); cursor: pointer; }
-  nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .badge { display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 4px; border-radius: 9px;
-    background: var(--bad); color: var(--surface); font-size: 11px; line-height: 18px; }
-  main .wrap { padding-block: 16px 40px; }
-  section { display: grid; gap: 10px; }
-  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .grow { flex: 1 1 160px; min-width: 0; }
   input, select, textarea, button { font: inherit; color: inherit; }
-  input, select, textarea { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; width: 100%; }
-  .row > select { width: auto; flex: 1 1 140px; }
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .btn { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; cursor: pointer; white-space: nowrap; }
-  .btn:hover { border-color: var(--accent); }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
-  .btn.danger { color: var(--bad); }
-  .banner { background: var(--accent-soft); border-radius: 10px; padding: 10px 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-  .banner p { margin: 0; flex: 1 1 200px; }
-  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 8px; text-align: center; cursor: pointer; }
-  .stat.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-  .stat b { display: block; font: 700 26px/1.1 var(--display); font-variant-numeric: tabular-nums; }
-  .stat b.bad { color: var(--bad); } .stat b.warn { color: var(--warn); }
-  .stat span { font-size: 12px; color: var(--muted); }
-  .list { display: grid; gap: 6px; }
-  .group-title { margin: 12px 0 2px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
-  .item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center;
-    background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
-  .item .info { cursor: pointer; min-width: 0; }
-  .item .name { font-weight: 700; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-  .item .meta { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
-  .qty { display: flex; align-items: center; gap: 4px; }
-  .qty button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-size: 18px; line-height: 1; }
-  .qty button:hover { border-color: var(--accent); }
-  .qty .n { min-width: 64px; text-align: center; font-variant-numeric: tabular-nums; font-size: 14px; }
-  .tag { padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 700; }
-  .tag.warn { background: var(--warn-bg); color: var(--warn); }
-  .tag.bad { background: var(--bad-bg); color: var(--bad); }
-  .tag.ex { background: var(--accent-soft); color: var(--accent); }
-  .empty { color: var(--muted); text-align: center; padding: 32px 0; }
-  .shop-item { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
-  .shop-item input { width: 20px; height: 20px; flex: none; accent-color: var(--accent); }
-  .shop-item .label { flex: 1; min-width: 0; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-  .shop-item.done .label { text-decoration: line-through; color: var(--muted); }
-  .link { background: none; border: 0; color: var(--muted); cursor: pointer; text-decoration: underline; padding: 0; font-size: 13px; }
+  :focus-visible { outline: 2px solid var(--basil); outline-offset: 2px; }
+  .mono { font-family: var(--mono); }
+
+  /* ---- header ---- */
+  header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  header .wrap { padding-block: 18px 12px; display: grid; gap: 14px; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand svg { flex: none; }
+  h1 { font-size: 21px; font-weight: 700; letter-spacing: -.02em; margin: 0; line-height: 1; }
+  .date { font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+  .icon-btn { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%;
+    border: 1px solid var(--line); background: var(--surface); cursor: pointer; color: var(--ink); }
+  .icon-btn:hover { border-color: var(--line-strong); }
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--sunken); border-radius: 12px; padding: 3px; }
+  .seg button { border: 0; background: none; padding: 8px 6px; border-radius: 9px; cursor: pointer;
+    font-weight: 600; font-size: 14px; color: var(--muted); display: flex; justify-content: center; align-items: center; gap: 6px; }
+  .seg button.active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+  .count { font: 500 11px var(--mono); min-width: 18px; padding: 1px 5px; border-radius: 6px;
+    background: var(--tomato); color: var(--surface); }
+
+  main .wrap { padding-block: 8px 48px; }
+  section { display: grid; gap: 14px; }
+
+  /* ---- summary ledger ---- */
+  .ledger { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .ledger button { border: 0; background: none; text-align: left; padding: 14px 14px 12px; cursor: pointer; display: grid; gap: 2px; }
+  .ledger button + button { border-left: 1px solid var(--line); }
+  .ledger button.on { background: var(--sunken); }
+  .ledger b { font-size: 28px; font-weight: 600; letter-spacing: -.03em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .ledger span { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+
+  /* ---- toolbar ---- */
+  .search { position: relative; }
+  .search svg { position: absolute; left: 12px; top: 50%; translate: 0 -50%; color: var(--muted); pointer-events: none; }
+  .field { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; min-width: 0; }
+  .field:hover { border-color: var(--line-strong); }
+  .search .field { padding-left: 38px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .chip { flex: none; border: 1px solid var(--line); background: var(--surface); border-radius: 999px;
+    padding: 6px 12px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--muted); }
+  .chip.on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+  .chip.sort { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+  .sep { flex: 1 0 0; }
+
+  .btn { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 10px 16px;
+    cursor: pointer; font-weight: 600; white-space: nowrap; }
+  .btn:hover { border-color: var(--line-strong); }
+  .btn.primary { background: var(--basil); border-color: var(--basil); color: var(--basil-ink); }
+  .btn.primary:hover { filter: brightness(1.06); }
+  .btn.ghost { background: none; }
+  .btn.danger { color: var(--tomato); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .grow { flex: 1 1 180px; min-width: 0; }
+
+  .note { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; border-radius: 12px;
+    background: var(--basil-soft); font-size: 14px; }
+  .note p { margin: 0; flex: 1 1 200px; }
+  .note .btn { padding: 6px 12px; font-size: 13px; }
+
+  /* ---- shelves & jars ---- */
+  .shelf { display: grid; gap: 0; }
+  .shelf-label { display: flex; justify-content: space-between; align-items: baseline; padding: 18px 2px 8px;
+    border-bottom: 2px solid var(--line-strong); font: 500 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center;
+    padding: 12px 2px; border-bottom: 1px solid var(--line); }
+  .item .info { min-width: 0; cursor: pointer; display: grid; gap: 3px; }
+  .item .name { font-weight: 600; font-size: 15px; overflow-wrap: anywhere; }
+  .item .info:hover .name { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
+  .item .meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
+  .item .meta i { font-style: normal; color: var(--line-strong); }
+
+  .jar { position: relative; width: 22px; height: 30px; flex: none; }
+  .jar::before { content: ""; position: absolute; left: 4px; right: 4px; top: 0; height: 4px; border-radius: 2px; background: var(--line-strong); }
+  .jar .glass { position: absolute; inset: 5px 0 0; border: 1.5px solid var(--line-strong); border-radius: 4px 4px 7px 7px; overflow: hidden; background: var(--surface); }
+  .jar .fill { position: absolute; left: 0; right: 0; bottom: 0; height: var(--f); background: var(--c); opacity: .85; }
+  @media (prefers-reduced-motion: no-preference) { .jar .fill { transition: height .35s ease; } }
+
+  .stamp { font: 500 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 2px 6px; border-radius: 4px;
+    border: 1px solid currentColor; line-height: 1.3; }
+  .stamp.ok { color: var(--muted); border-color: var(--line-strong); }
+  .stamp.soon { color: var(--turmeric); background: var(--turmeric-soft); border-color: transparent; }
+  .stamp.bad { color: var(--tomato); background: var(--tomato-soft); border-color: transparent; }
+  .stamp.ex { color: var(--basil); background: var(--basil-soft); border-color: transparent; }
+
+  .stepper { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
+  .stepper button { width: 34px; height: 34px; border: 0; background: none; cursor: pointer; border-radius: 50%; display: grid; place-items: center; color: var(--muted); }
+  .stepper button:hover { color: var(--ink); background: var(--sunken); }
+  .stepper .n { min-width: 58px; text-align: center; font: 500 13px var(--mono); font-variant-numeric: tabular-nums; }
+  .stepper .n small { color: var(--muted); font-size: 11px; margin-left: 2px; }
+
+  .empty { text-align: center; padding: 48px 16px; color: var(--muted); display: grid; gap: 14px; justify-items: center; }
+  .empty .row { justify-content: center; }
+
+  /* ---- shopping ---- */
+  .add-line { display: flex; gap: 8px; }
+  .check { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center;
+    padding: 13px 2px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .check input { appearance: none; width: 22px; height: 22px; border: 1.5px solid var(--line-strong); border-radius: 7px; margin: 0;
+    display: grid; place-items: center; cursor: pointer; background: var(--surface); }
+  .check input:checked { background: var(--basil); border-color: var(--basil); }
+  .check input:checked::after { content: ""; width: 10px; height: 6px; border: 2px solid var(--basil-ink); border-top: 0; border-right: 0; rotate: -45deg; translate: 0 -1px; }
+  .check .label { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-weight: 500; overflow-wrap: anywhere; }
+  .check.done .label { color: var(--muted); text-decoration: line-through; }
+  .link { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 13px; padding: 4px; }
+  .link:hover { color: var(--tomato); }
   .hint { color: var(--muted); font-size: 13px; margin: 0; }
-  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 8px; }
-  .panel b { font-family: var(--display); font-size: 16px; }
-  dialog { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--fg);
-    width: min(460px, calc(100vw - 32px)); padding: 16px; }
-  dialog::backdrop { background: rgb(0 0 0 / .45); }
-  .form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .form label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); min-width: 0; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ---- settings ---- */
+  .group { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: grid; gap: 10px; }
+  .group h2 { margin: 0; font-size: 15px; font-weight: 600; }
+  .themes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .theme-opt { border: 1px solid var(--line); border-radius: 12px; padding: 10px; background: var(--bg); cursor: pointer; display: grid; gap: 8px; font-size: 13px; font-weight: 600; text-align: left; }
+  .theme-opt.on { border-color: var(--basil); box-shadow: inset 0 0 0 1px var(--basil); }
+  .swatch { height: 34px; border-radius: 8px; border: 1px solid var(--line); display: flex; overflow: hidden; }
+  .swatch span { flex: 1; }
+
+  /* ---- dialogs ---- */
+  dialog { border: 1px solid var(--line); border-radius: 20px; background: var(--surface); color: var(--ink);
+    width: min(480px, calc(100vw - 32px)); padding: 20px; box-shadow: 0 20px 60px rgb(0 0 0 / .2); }
+  dialog::backdrop { background: rgb(10 12 10 / .4); backdrop-filter: blur(2px); }
+  dialog h3 { margin: 0 0 16px; font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
+  .form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form label { display: grid; gap: 5px; font: 500 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); min-width: 0; }
+  .form .field { font: 15px var(--sans); letter-spacing: 0; text-transform: none; color: var(--ink); padding: 10px 12px; }
   .form .full { grid-column: 1 / -1; }
-  textarea { min-height: 160px; font: 12px/1.4 ui-monospace, Menlo, monospace; resize: vertical; }
-  .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-    background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 10px; z-index: 20; max-width: calc(100vw - 32px); }
-  @media (max-width: 420px) { .form { grid-template-columns: 1fr; } }
-  @media (prefers-reduced-motion: no-preference) { .item, .shop-item { transition: border-color .15s; } }
+  .dlg-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+  textarea.field { min-height: 170px; font: 12px/1.45 var(--mono); resize: vertical; }
+  @media (max-width: 520px) {
+    dialog { width: 100%; max-width: 100%; margin: auto 0 0; border-radius: 20px 20px 0 0; border-bottom: 0;
+      padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); max-height: 92vh; }
+    .form { grid-template-columns: 1fr 1fr; }
+  }
+
+  .toast { position: fixed; left: 50%; translate: -50% 0; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 20;
+    background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 14px; max-width: calc(100vw - 32px); box-shadow: var(--shadow); }
 </style>
 
 <header>
   <div class="wrap">
-    <h1>Home Pantry <small id="todayLabel"></small></h1>
-    <nav>
+    <div class="top">
+      <div class="brand">
+        <svg width="28" height="32" viewBox="0 0 28 32" aria-hidden="true">
+          <rect x="6" y="1" width="16" height="5" rx="2" fill="var(--basil)"/>
+          <rect x="2.75" y="7.75" width="22.5" height="22.5" rx="6" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
+          <rect x="5" y="17" width="18" height="11" rx="4" fill="var(--basil)" opacity=".85"/>
+        </svg>
+        <div>
+          <h1>Pantry</h1>
+          <div class="date" id="todayLabel"></div>
+        </div>
+      </div>
+      <button class="icon-btn" id="themeBtn" aria-label="Switch theme" title="Switch theme"></button>
+    </div>
+    <nav class="seg">
       <button id="tabStock" data-tab="stock" class="active">Stock</button>
-      <button id="tabShop" data-tab="shop">Shopping <span id="shopBadge" class="badge" hidden></span></button>
+      <button id="tabShop" data-tab="shop">Shopping <span id="shopBadge" class="count" hidden></span></button>
       <button id="tabSettings" data-tab="settings">Settings</button>
     </nav>
   </div>
@@ -110,68 +213,69 @@
 
 <main><div class="wrap">
   <section id="tab-stock">
-    <div id="sampleBanner" class="banner" hidden>
-      <p>These are example items so you can try things out.</p>
+    <div id="sampleBanner" class="note" hidden>
+      <p>You're looking at example items. Try the buttons, then clear them.</p>
       <button class="btn" id="clearSampleBtn">Clear examples</button>
     </div>
-    <div class="stats">
-      <div class="stat" data-filter="expiring"><b id="statExp" class="bad">0</b><span>Expiring in 3 days</span></div>
-      <div class="stat" data-filter="low"><b id="statLow" class="warn">0</b><span>Running low</span></div>
-      <div class="stat" data-filter="all"><b id="statAll">0</b><span>Items</span></div>
+
+    <div class="ledger">
+      <button data-filter="expiring"><b id="statExp">0</b><span><i class="dot" style="background:var(--tomato)"></i>Use soon</span></button>
+      <button data-filter="low"><b id="statLow">0</b><span><i class="dot" style="background:var(--turmeric)"></i>Running low</span></button>
+      <button data-filter="all"><b id="statAll">0</b><span><i class="dot" style="background:var(--basil)"></i>In pantry</span></button>
     </div>
+
     <div class="row">
-      <input id="search" class="grow" type="search" placeholder="Search items">
-      <button class="btn primary" id="addBtn">+ Add item</button>
+      <div class="search grow">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="m11 11 3.5 3.5" stroke-linecap="round"/></svg>
+        <input id="search" class="field" type="search" placeholder="Search your pantry" aria-label="Search">
+      </div>
+      <button class="btn primary" id="addBtn">Add item</button>
     </div>
-    <div class="row">
-      <select id="filterLoc" aria-label="Location"></select>
-      <select id="filterStatus" aria-label="Status">
-        <option value="all">All items</option>
-        <option value="expiring">Expiring or expired</option>
-        <option value="low">Running low</option>
-        <option value="out">Out of stock</option>
-      </select>
-      <select id="sortBy" aria-label="Sort">
-        <option value="category">By category</option>
-        <option value="location">By location</option>
-        <option value="expiry">By expiry date</option>
-        <option value="name">A to Z</option>
-      </select>
-    </div>
-    <div id="stockList" class="list"></div>
+
+    <div class="chips" id="locChips" role="toolbar" aria-label="Filter by location"></div>
+
+    <div id="stockList"></div>
   </section>
 
   <section id="tab-shop" hidden>
-    <form id="shopForm" class="row">
-      <input id="shopInput" class="grow" placeholder="Add to shopping list" autocomplete="off" list="knownItems">
+    <form id="shopForm" class="add-line">
+      <input id="shopInput" class="field grow" placeholder="Add something to buy" autocomplete="off" list="knownItems" aria-label="Item to buy">
       <button class="btn primary">Add</button>
     </form>
-    <div id="shopList" class="list"></div>
-    <div class="row">
-      <button class="btn primary" id="restockBtn">Move ticked items to pantry</button>
+    <div id="shopList"></div>
+    <div class="actions">
+      <button class="btn primary" id="restockBtn">Move ticked to pantry</button>
       <button class="btn" id="copyShopBtn">Copy list</button>
     </div>
-    <p class="hint">Items at or below their low level appear here automatically.</p>
+    <p class="hint">Anything at or below its low level shows up here on its own.</p>
   </section>
 
   <section id="tab-settings" hidden>
-    <div class="panel">
-      <b>Backup</b>
-      <p class="hint">Your data is saved in this browser only. Copy a backup to move it to another device.</p>
-      <div class="row">
-        <button class="btn" id="exportBtn">Copy backup</button>
-        <button class="btn" id="importBtn">Restore backup</button>
-        <button class="btn" id="sampleBtn">Add example items</button>
+    <div class="group">
+      <h2>Appearance</h2>
+      <div class="themes" id="themeOpts">
+        <button class="theme-opt" data-mode="system"><div class="swatch"><span style="background:#f6f6f3"></span><span style="background:#121412"></span></div>System</button>
+        <button class="theme-opt" data-mode="light"><div class="swatch"><span style="background:#f6f6f3"></span><span style="background:#3f6b3a;flex:.35"></span></div>Light</button>
+        <button class="theme-opt" data-mode="dark"><div class="swatch"><span style="background:#121412"></span><span style="background:#8fc283;flex:.35"></span></div>Dark</button>
       </div>
     </div>
-    <div class="panel">
-      <b>Locations</b>
-      <p class="hint">Separate with commas.</p>
-      <div class="row"><input id="locInput" class="grow"><button class="btn" id="locSave">Save</button></div>
+    <div class="group">
+      <h2>Backup</h2>
+      <p class="hint">Your pantry is saved in this browser only. Copy a backup to keep it safe or move it to another device.</p>
+      <div class="actions">
+        <button class="btn" id="exportBtn">Copy backup</button>
+        <button class="btn" id="importBtn">Restore backup</button>
+        <button class="btn ghost" id="sampleBtn">Add example items</button>
+      </div>
     </div>
-    <div class="panel">
-      <b>Reset</b>
-      <div class="row"><button class="btn danger" id="wipeBtn">Delete all data</button></div>
+    <div class="group">
+      <h2>Shelves</h2>
+      <p class="hint">Where you keep things. Separate with commas.</p>
+      <div class="row"><input id="locInput" class="field grow" aria-label="Locations"><button class="btn" id="locSave">Save</button></div>
+    </div>
+    <div class="group">
+      <h2>Reset</h2>
+      <div class="actions"><button class="btn danger" id="wipeBtn">Delete all data</button></div>
     </div>
   </section>
 </div></main>
@@ -180,17 +284,17 @@
   <form id="itemForm">
     <h3 id="dialogTitle">Add item</h3>
     <div class="form">
-      <label class="full">Name<input id="fName" name="name" required list="knownItems" autocomplete="off"></label>
-      <label>Quantity<input id="fQty" name="qty" type="number" min="0" step="any" value="1" required></label>
-      <label>Unit<input id="fUnit" name="unit" placeholder="pcs, kg, L" list="units"></label>
-      <label>Category<input id="fCat" name="category" list="categories" placeholder="Dairy"></label>
-      <label>Location<select id="fLoc" name="location"></select></label>
-      <label>Expiry date<input id="fExp" name="expiry" type="date"></label>
-      <label>Low when at or below<input id="fLow" name="low" type="number" min="0" step="any" placeholder="1"></label>
-      <label class="full">Notes<input id="fNotes" name="notes"></label>
+      <label class="full">Name<input id="fName" class="field" name="name" required list="knownItems" autocomplete="off"></label>
+      <label>Quantity<input id="fQty" class="field" name="qty" type="number" min="0" step="any" value="1" required></label>
+      <label>Unit<input id="fUnit" class="field" name="unit" placeholder="pcs, kg, L" list="units"></label>
+      <label>Category<input id="fCat" class="field" name="category" list="categories" placeholder="Dairy"></label>
+      <label>Shelf<select id="fLoc" class="field" name="location"></select></label>
+      <label>Best before<input id="fExp" class="field" name="expiry" type="date"></label>
+      <label>Low at<input id="fLow" class="field" name="low" type="number" min="0" step="any" placeholder="1"></label>
+      <label class="full">Notes<input id="fNotes" class="field" name="notes"></label>
     </div>
-    <div class="row" style="margin-top:14px;justify-content:space-between">
-      <button type="button" class="btn danger" id="deleteItemBtn">Delete</button>
+    <div class="dlg-actions">
+      <button type="button" class="btn ghost danger" id="deleteItemBtn">Delete</button>
       <div class="row">
         <button type="button" class="btn" id="cancelBtn">Cancel</button>
         <button type="submit" class="btn primary">Save</button>
@@ -200,8 +304,8 @@
 </dialog>
 
 <dialog id="confirmDialog">
-  <p id="confirmText" style="margin:0 0 16px"></p>
-  <div class="row" style="justify-content:flex-end">
+  <h3 id="confirmText"></h3>
+  <div class="dlg-actions" style="justify-content:flex-end">
     <button class="btn" id="confirmNo">Cancel</button>
     <button class="btn primary" id="confirmYes">OK</button>
   </div>
@@ -209,10 +313,10 @@
 
 <dialog id="textDialog">
   <h3 id="textTitle"></h3>
-  <p class="hint" id="textHint" style="margin-bottom:8px"></p>
-  <textarea id="textArea"></textarea>
-  <div class="row" style="justify-content:flex-end;margin-top:10px">
-    <label class="btn" id="fileLabel" hidden>Choose file<input id="importFile" type="file" accept="application/json,.json" hidden></label>
+  <p class="hint" id="textHint" style="margin:-8px 0 12px"></p>
+  <textarea id="textArea" class="field"></textarea>
+  <div class="dlg-actions" style="justify-content:flex-end">
+    <label class="btn ghost" id="fileLabel" hidden>Choose file<input id="importFile" type="file" accept="application/json,.json" hidden></label>
     <button class="btn" id="textClose">Close</button>
     <button class="btn primary" id="textAction"></button>
   </div>
@@ -224,6 +328,7 @@
 
 <script>
 const KEY = 'pantry.v1';
+const THEME_KEY = 'pantry.theme';
 const DEFAULT_LOCATIONS = ['Pantry', 'Fridge', 'Freezer'];
 const DEFAULT_CATEGORIES = ['Produce', 'Dairy', 'Meat & Fish', 'Bakery', 'Grains & Pasta', 'Canned', 'Spices', 'Snacks', 'Drinks', 'Frozen', 'Household'];
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -231,6 +336,32 @@ const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const fmtQty = (n) => Number.isInteger(n) ? n : +n.toFixed(2);
 const isoDay = (offset = 0) => { const x = new Date(); x.setDate(x.getDate() + offset); return x.toLocaleDateString('en-CA'); };
+const ICONS = {
+  minus: '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  plus: '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7h8M7 3v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  system: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="9" cy="9" r="6.5"/><path d="M9 2.5v13a6.5 6.5 0 0 0 0-13Z" fill="currentColor"/></svg>',
+  light: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="3.5"/><path d="M9 1.5v1.8M9 14.7v1.8M1.5 9h1.8M14.7 9h1.8M3.7 3.7l1.3 1.3M13 13l1.3 1.3M3.7 14.3 5 13M13 5l1.3-1.3"/></svg>',
+  dark: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M15 10.5A6.5 6.5 0 0 1 7.5 3a6.5 6.5 0 1 0 7.5 7.5Z"/></svg>',
+};
+
+// ---- theme (per-viewer preference) ----
+let themeMode = 'system';
+try { themeMode = localStorage.getItem(THEME_KEY) || 'system'; } catch (e) {}
+function applyTheme(mode) {
+  themeMode = mode;
+  if (mode === 'system') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', mode);
+  try { localStorage.setItem(THEME_KEY, mode); } catch (e) {}
+  $('#themeBtn').innerHTML = ICONS[mode];
+  $('#themeBtn').title = $('#themeBtn').ariaLabel = `Theme: ${mode}. Click to change.`;
+  document.querySelectorAll('.theme-opt').forEach(b => b.classList.toggle('on', b.dataset.mode === mode));
+}
+$('#themeBtn').onclick = () => {
+  const next = { system: 'light', light: 'dark', dark: 'system' }[themeMode];
+  applyTheme(next); toast(`Theme: ${next}`);
+};
+document.querySelectorAll('.theme-opt').forEach(b => b.onclick = () => applyTheme(b.dataset.mode));
+applyTheme(themeMode);
 
 // ---- storage ----
 let firstRun = false;
@@ -255,7 +386,7 @@ function toast(msg) {
   document.querySelector('.toast')?.remove();
   const t = Object.assign(document.createElement('div'), { className: 'toast', textContent: msg, role: 'status' });
   document.body.append(t);
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.remove(), 3500);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.remove(), 3000);
 }
 function ask(text, okLabel = 'OK') {
   return new Promise(resolve => {
@@ -289,6 +420,13 @@ function daysUntil(date) {
 const isLow = (i) => i.low !== '' && i.low != null && i.qty <= Number(i.low);
 const isExpiring = (i) => { const d = daysUntil(i.expiry); return d !== null && d <= 3; };
 
+// Jar fill: stock relative to three times the low level (or full when no low level is set)
+function jarLevel(i) {
+  if (i.qty <= 0) return 0;
+  const target = Number(i.low) > 0 ? Number(i.low) * 3 : null;
+  return target ? Math.max(0.12, Math.min(1, i.qty / target)) : 0.7;
+}
+
 // Shopping list = manual entries + low-stock items not already listed
 function shoppingView() {
   const names = new Set(state.shopping.map(s => s.name.toLowerCase()));
@@ -297,6 +435,10 @@ function shoppingView() {
   return [...state.shopping, ...auto];
 }
 
+// ---- view state ----
+let view = { loc: '', status: 'all', sort: 'location' };
+const SORTS = { location: 'Shelf', category: 'Category', expiry: 'Best before', name: 'A–Z' };
+
 // ---- rendering ----
 function render() {
   $('#statExp').textContent = state.items.filter(isExpiring).length;
@@ -304,69 +446,94 @@ function render() {
   $('#statAll').textContent = state.items.length;
   $('#sampleBanner').hidden = !state.items.some(i => i.sample);
 
-  const locSel = $('#filterLoc'), cur = locSel.value;
-  locSel.innerHTML = '<option value="">All locations</option>' + state.locations.map(l => `<option ${l === cur ? 'selected' : ''}>${esc(l)}</option>`).join('');
   $('#fLoc').innerHTML = state.locations.map(l => `<option>${esc(l)}</option>`).join('');
   const cats = [...new Set([...DEFAULT_CATEGORIES, ...state.items.map(i => i.category).filter(Boolean)])];
   $('#categories').innerHTML = cats.map(c => `<option>${esc(c)}</option>`).join('');
   $('#knownItems').innerHTML = [...new Set(state.items.map(i => i.name))].map(n => `<option>${esc(n)}</option>`).join('');
   $('#locInput').value = state.locations.join(', ');
+  if (view.loc && !state.locations.includes(view.loc)) view.loc = '';
 
   renderStock();
   renderShop();
 }
 
-function renderStock() {
-  const q = $('#search').value.trim().toLowerCase();
-  const loc = $('#filterLoc').value;
-  const status = $('#filterStatus').value;
-  const sort = $('#sortBy').value;
-  document.querySelectorAll('.stat').forEach(s => s.classList.toggle('on', s.dataset.filter === status && status !== 'all'));
+function renderChips() {
+  const locs = ['', ...state.locations];
+  $('#locChips').innerHTML = locs.map(l => `<button class="chip ${view.loc === l ? 'on' : ''}" data-loc="${esc(l)}">${l ? esc(l) : 'All'}</button>`).join('')
+    + `<span class="sep"></span><button class="chip sort" id="sortChip" title="Change sort">Sort: ${SORTS[view.sort]}</button>`;
+  $('#locChips').querySelectorAll('[data-loc]').forEach(b => b.onclick = () => { view.loc = b.dataset.loc; renderStock(); });
+  $('#sortChip').onclick = () => {
+    const keys = Object.keys(SORTS);
+    view.sort = keys[(keys.indexOf(view.sort) + 1) % keys.length]; renderStock();
+  };
+}
 
+function renderStock() {
+  renderChips();
+  document.querySelectorAll('.ledger button').forEach(b => b.classList.toggle('on', b.dataset.filter === view.status && view.status !== 'all'));
+  const q = $('#search').value.trim().toLowerCase();
   const items = state.items.filter(i =>
     (!q || [i.name, i.category, i.notes].some(v => (v || '').toLowerCase().includes(q))) &&
-    (!loc || i.location === loc) &&
-    (status === 'all' || (status === 'expiring' && isExpiring(i)) || (status === 'low' && isLow(i)) || (status === 'out' && i.qty <= 0)));
+    (!view.loc || i.location === view.loc) &&
+    (view.status === 'all' || (view.status === 'expiring' && isExpiring(i)) || (view.status === 'low' && isLow(i))));
 
   const list = $('#stockList');
   if (!state.items.length) {
-    list.innerHTML = `<div class="empty">Your pantry is empty.<br><br><button class="btn primary" onclick="openItem()">Add your first item</button> <button class="btn" onclick="loadSample()">Add example items</button></div>`;
+    list.innerHTML = `<div class="empty"><svg width="56" height="64" viewBox="0 0 28 32" aria-hidden="true"><rect x="6" y="1" width="16" height="5" rx="2" fill="var(--line-strong)"/><rect x="2.75" y="7.75" width="22.5" height="22.5" rx="6" fill="none" stroke="var(--line-strong)" stroke-width="1.5"/></svg>
+      <div>Your shelves are empty.</div>
+      <div class="row"><button class="btn primary" onclick="openItem()">Add your first item</button><button class="btn" onclick="loadSample()">Add example items</button></div></div>`;
     return;
   }
-  if (!items.length) { list.innerHTML = '<div class="empty">No items match these filters.</div>'; return; }
+  if (!items.length) {
+    const label = { expiring: 'Nothing needs using up soon.', low: 'Nothing is running low.' }[view.status] || 'No items match.';
+    list.innerHTML = `<div class="empty">${label}</div>`; return;
+  }
 
   const byName = (a, b) => a.name.localeCompare(b.name);
-  if (sort === 'expiry' || sort === 'name') {
-    items.sort(sort === 'name' ? byName : (a, b) => (a.expiry || '9999').localeCompare(b.expiry || '9999') || byName(a, b));
-    list.innerHTML = items.map(itemHTML).join('');
+  if (view.sort === 'expiry' || view.sort === 'name') {
+    items.sort(view.sort === 'name' ? byName : (a, b) => (a.expiry || '9999').localeCompare(b.expiry || '9999') || byName(a, b));
+    list.innerHTML = `<div class="shelf"><div class="shelf-label"><span>${SORTS[view.sort]}</span><span>${items.length}</span></div>${items.map(itemHTML).join('')}</div>`;
     return;
   }
   const groups = {};
-  items.forEach(i => (groups[i[sort] || 'Other'] ??= []).push(i));
-  list.innerHTML = Object.keys(groups).sort().map(g =>
-    `<div class="group-title">${esc(g)} · ${groups[g].length}</div>` + groups[g].sort(byName).map(itemHTML).join('')).join('');
+  items.forEach(i => (groups[i[view.sort] || 'Unsorted'] ??= []).push(i));
+  const order = view.sort === 'location' ? state.locations : Object.keys(groups).sort();
+  const keys = [...order.filter(k => groups[k]), ...Object.keys(groups).filter(k => !order.includes(k))];
+  list.innerHTML = keys.map(g =>
+    `<div class="shelf"><div class="shelf-label"><span>${esc(g)}</span><span>${groups[g].length}</span></div>${groups[g].sort(byName).map(itemHTML).join('')}</div>`).join('');
+}
+
+function bbLabel(date) {
+  return new Date(date + 'T00:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
 }
 
 function itemHTML(i) {
   const d = daysUntil(i.expiry);
-  let tags = '';
-  if (d !== null && d < 0) tags += `<span class="tag bad">expired ${-d}d ago</span>`;
-  else if (d === 0) tags += `<span class="tag bad">expires today</span>`;
-  else if (d !== null && d <= 3) tags += `<span class="tag warn">${d}d left</span>`;
-  if (i.qty <= 0) tags += `<span class="tag bad">out</span>`;
-  else if (isLow(i)) tags += `<span class="tag warn">low</span>`;
-  if (i.sample) tags += `<span class="tag ex">example</span>`;
-  const meta = [i.location, i.category, i.expiry && d > 3 ? 'use by ' + i.expiry : '', i.notes].filter(Boolean).map(esc).join(' · ');
+  const low = isLow(i), out = i.qty <= 0;
+  const color = out ? 'var(--tomato)' : low ? 'var(--turmeric)' : 'var(--basil)';
+  const bits = [];
+  if (d !== null) {
+    if (d < 0) bits.push(`<span class="stamp bad">Expired ${-d}d</span>`);
+    else if (d === 0) bits.push(`<span class="stamp bad">Use today</span>`);
+    else if (d <= 3) bits.push(`<span class="stamp soon">BB ${bbLabel(i.expiry)} · ${d}d</span>`);
+    else bits.push(`<span class="stamp ok">BB ${bbLabel(i.expiry)}</span>`);
+  }
+  if (out) bits.push(`<span class="stamp bad">Out</span>`);
+  else if (low) bits.push(`<span class="stamp soon">Low</span>`);
+  if (i.sample) bits.push(`<span class="stamp ex">Example</span>`);
+  const context = [view.sort === 'location' ? i.category : i.location, i.notes].filter(Boolean).map(esc).join(' <i>/</i> ');
+  if (context) bits.push(`<span>${context}</span>`);
   const step = /^(g|ml)$/i.test(i.unit || '') ? 100 : 1;
   return `<div class="item">
-    <div class="info" onclick="openItem('${i.id}')" title="Edit">
-      <div class="name">${esc(i.name)}${tags}</div>
-      <div class="meta">${meta}</div>
+    <div class="jar" style="--f:${Math.round(jarLevel(i) * 100)}%;--c:${color}" title="${out ? 'Out of stock' : low ? 'Running low' : 'In stock'}"><div class="glass"><div class="fill"></div></div></div>
+    <div class="info" onclick="openItem('${i.id}')" title="Edit ${esc(i.name)}">
+      <div class="name">${esc(i.name)}</div>
+      ${bits.length ? `<div class="meta">${bits.join('')}</div>` : ''}
     </div>
-    <div class="qty">
-      <button aria-label="Use ${step}" onclick="bump('${i.id}', -${step})">−</button>
-      <span class="n">${fmtQty(i.qty)} ${esc(i.unit || '')}</span>
-      <button aria-label="Add ${step}" onclick="bump('${i.id}', ${step})">+</button>
+    <div class="stepper">
+      <button aria-label="Use ${step}" onclick="bump('${i.id}', -${step})">${ICONS.minus}</button>
+      <span class="n">${fmtQty(i.qty)}<small>${esc(i.unit || '')}</small></span>
+      <button aria-label="Add ${step}" onclick="bump('${i.id}', ${step})">${ICONS.plus}</button>
     </div>
   </div>`;
 }
@@ -376,10 +543,10 @@ function renderShop() {
   const pending = list.filter(s => !s.done).length;
   $('#shopBadge').hidden = !pending; $('#shopBadge').textContent = pending;
   $('#shopList').innerHTML = list.length ? list.map(s => `
-    <label class="shop-item ${s.done ? 'done' : ''}">
+    <label class="check ${s.done ? 'done' : ''}">
       <input type="checkbox" ${s.done ? 'checked' : ''} onchange="toggleShop('${s.id}')">
-      <span class="label">${esc(s.name)}${s.auto ? ' <span class="tag warn">low stock</span>' : ''}</span>
-      ${s.auto ? '' : `<button type="button" class="link" onclick="event.preventDefault();removeShop('${s.id}')">Remove</button>`}
+      <span class="label">${esc(s.name)}${s.auto ? ' <span class="stamp soon">Low stock</span>' : ''}</span>
+      ${s.auto ? '<span></span>' : `<button type="button" class="link" aria-label="Remove ${esc(s.name)}" onclick="event.preventDefault();removeShop('${s.id}')">Remove</button>`}
     </label>`).join('') : '<div class="empty">Nothing to buy right now.</div>';
 }
 
@@ -398,7 +565,7 @@ function openItem(id) {
   $('#dialogTitle').textContent = i ? 'Edit item' : 'Add item';
   $('#deleteItemBtn').hidden = !i;
   if (i) for (const k of ['name', 'qty', 'unit', 'category', 'location', 'expiry', 'low', 'notes']) f[k].value = i[k] ?? '';
-  else if ($('#filterLoc').value) f.location.value = $('#filterLoc').value;
+  else if (view.loc) f.location.value = view.loc;
   $('#itemDialog').showModal();
   f.name.focus();
 }
@@ -419,7 +586,7 @@ $('#itemForm').addEventListener('submit', (e) => {
   } else {
     // Merge into an existing item with same name + location + expiry instead of duplicating
     const dup = state.items.find(x => x.name.toLowerCase() === data.name.toLowerCase() && x.location === data.location && (x.expiry || '') === data.expiry);
-    if (dup) { dup.qty += data.qty; toast(`Added ${data.qty} to existing ${dup.name}`); }
+    if (dup) { dup.qty += data.qty; toast(`Added ${data.qty} to ${dup.name}`); }
     else { state.items.push({ id: uid(), added: isoDay(), ...data }); toast('Added ' + data.name); }
   }
   $('#itemDialog').close();
@@ -467,7 +634,7 @@ $('#restockBtn').onclick = () => {
   });
   state.shopping = state.shopping.filter(s => !s.done);
   save();
-  toast(`Restocked ${done.length} item${done.length > 1 ? 's' : ''}` + (created ? `, ${created} new. Set their expiry dates in Stock.` : ''));
+  toast(`Restocked ${done.length} item${done.length > 1 ? 's' : ''}` + (created ? `, ${created} new. Set their dates in Stock.` : ''));
 };
 $('#copyShopBtn').onclick = () => {
   const text = shoppingView().filter(s => !s.done).map(s => '- ' + s.name).join('\n');
@@ -478,16 +645,16 @@ $('#copyShopBtn').onclick = () => {
 // ---- settings ----
 $('#exportBtn').onclick = () => {
   const json = JSON.stringify(state, null, 2);
-  textBox({ title: 'Backup', hint: 'Copy this text and keep it somewhere safe, such as a note or email to yourself.', value: json, action: 'Copy', onAction: () => copyText(json, $('#textArea')) });
+  textBox({ title: 'Backup', hint: 'Copy this text and keep it somewhere safe, such as a note or an email to yourself.', value: json, action: 'Copy', onAction: () => copyText(json, $('#textArea')) });
 };
 $('#importBtn').onclick = () => {
-  textBox({ title: 'Restore backup', hint: 'Paste a backup, or choose a backup file. This replaces your current data.', action: 'Restore', file: true,
+  textBox({ title: 'Restore backup', hint: 'Paste a backup or choose a backup file. This replaces your current pantry.', action: 'Restore', file: true,
     onAction: async (text) => {
       try {
         const data = JSON.parse(text);
         if (!Array.isArray(data.items)) throw new Error('no items found');
         $('#textDialog').close();
-        if (!(await ask(`Replace your current data with ${data.items.length} items from the backup?`, 'Replace'))) return;
+        if (!(await ask(`Replace your pantry with ${data.items.length} items from the backup?`, 'Replace'))) return;
         state = { items: [], shopping: [], locations: [...DEFAULT_LOCATIONS], ...data };
         save(); toast('Backup restored');
       } catch (err) { toast('That backup could not be read: ' + err.message); }
@@ -496,7 +663,7 @@ $('#importBtn').onclick = () => {
 $('#importFile').onchange = async (e) => { $('#textArea').value = await e.target.files[0].text(); e.target.value = ''; };
 $('#locSave').onclick = () => {
   const locs = $('#locInput').value.split(',').map(s => s.trim()).filter(Boolean);
-  if (locs.length) { state.locations = [...new Set(locs)]; save(); toast('Locations saved'); }
+  if (locs.length) { state.locations = [...new Set(locs)]; save(); toast('Shelves saved'); }
 };
 $('#wipeBtn').onclick = async () => {
   if (await ask('Delete all pantry data? This cannot be undone.', 'Delete all')) {
@@ -512,26 +679,29 @@ function loadSample() {
   state.items.push(
     mk('Milk', 1, 'L', 'Dairy', 'Fridge', 2, 1),
     mk('Eggs', 4, 'pcs', 'Dairy', 'Fridge', 10, 6),
-    mk('Basmati rice', 2, 'kg', 'Grains & Pasta', 'Pantry', 200, 1),
+    mk('Greek yogurt', 2, 'pcs', 'Dairy', 'Fridge', 6, 1),
     mk('Spinach', 1, 'pack', 'Produce', 'Fridge', -1, ''),
     mk('Tomatoes', 6, 'pcs', 'Produce', 'Fridge', 5, 3),
+    mk('Basmati rice', 2, 'kg', 'Grains & Pasta', 'Pantry', 200, 1),
     mk('Chickpeas', 3, 'can', 'Canned', 'Pantry', 400, 2),
+    mk('Olive oil', 0, 'bottle', 'Oils', 'Pantry', null, 1),
     mk('Frozen peas', 500, 'g', 'Frozen', 'Freezer', 120, 200),
-    mk('Olive oil', 0, 'bottle', 'Grains & Pasta', 'Pantry', null, 1),
   );
   save();
 }
 
 // ---- tabs & filters ----
 function showTab(name) {
-  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('active', x.dataset.tab === name));
+  document.querySelectorAll('.seg button').forEach(x => x.classList.toggle('active', x.dataset.tab === name));
   document.querySelectorAll('main section').forEach(s => s.hidden = s.id !== 'tab-' + name);
 }
-document.querySelectorAll('nav button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
-document.querySelectorAll('.stat').forEach(s => s.onclick = () => { $('#filterStatus').value = s.dataset.filter; renderStock(); });
-['#search', '#filterLoc', '#filterStatus', '#sortBy'].forEach(s => $(s).addEventListener('input', renderStock));
+document.querySelectorAll('.seg button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
+document.querySelectorAll('.ledger button').forEach(b => b.onclick = () => {
+  view.status = view.status === b.dataset.filter ? 'all' : b.dataset.filter; renderStock();
+});
+$('#search').addEventListener('input', renderStock);
 $('#addBtn').onclick = () => openItem();
-$('#todayLabel').textContent = new Date().toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+$('#todayLabel').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
 
 if (firstRun) loadSample(); else render();
 </script>
