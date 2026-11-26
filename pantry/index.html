@@ -4,7 +4,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
 <style>
-  /* Layout: one column on a wooden pantry wall. Each location is a paper-lined shelf with a wood lip; each item is a labelled jar whose fill shows stock. */
+  /* Layout: app shell — sticky header with storage tabs (Overview + one per place), bottom tab bar for sections.
+     Each place gets its own summary card; items sit on paper-lined shelves with a wood lip, shown as jars whose fill shows stock. */
   :root {
     --bg: #e6dac7;          /* birch plywood */
     --grain: rgb(120 84 40 / .07);
@@ -65,7 +66,9 @@
   /* ---- header ---- */
   header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
     background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-  header .wrap { padding-block: 18px 12px; display: grid; gap: 14px; }
+  header { border-bottom: 1px solid var(--line); }
+  header .wrap { padding-block: 16px 0; display: grid; gap: 10px; }
+  header .top { padding-bottom: 6px; }
   .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .brand { display: flex; align-items: center; gap: 10px; }
   .brand svg { flex: none; }
@@ -74,25 +77,71 @@
   .icon-btn { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%;
     border: 1px solid var(--line); background: var(--surface); cursor: pointer; color: var(--ink); }
   .icon-btn:hover { border-color: var(--line-strong); }
-  .seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--sunken); border-radius: 12px; padding: 3px; }
-  .seg button { border: 0; background: none; padding: 8px 6px; border-radius: 9px; cursor: pointer;
-    font-weight: 600; font-size: 14px; color: var(--muted); display: flex; justify-content: center; align-items: center; gap: 6px; }
-  .seg button.active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
-  .count { font: 500 11px var(--mono); min-width: 18px; padding: 1px 5px; border-radius: 6px;
+  .loc-tabs { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; margin: 0 -4px; }
+  .loc-tabs::-webkit-scrollbar { display: none; }
+  .loc-tab { flex: 1 0 auto; justify-content: center; display: flex; align-items: center; gap: 6px; border: 0; background: none; cursor: pointer;
+    padding: 8px 5px 11px; border-bottom: 2.5px solid transparent; color: var(--muted); font-weight: 600; font-size: 14px; }
+  .loc-tab:hover { color: var(--ink); }
+  .loc-tab.active { color: var(--ink); border-bottom-color: var(--basil); }
+  .loc-tab .n { font: 500 11px var(--mono); background: var(--sunken); border-radius: 6px; padding: 1px 6px; color: var(--muted); }
+  .loc-tab.active .n { background: var(--basil-soft); color: var(--basil); }
+  .loc-tab .alert { width: 7px; height: 7px; border-radius: 50%; background: var(--tomato); margin-left: -3px; }
+  .count { font: 500 10px var(--mono); min-width: 17px; padding: 1px 4px; border-radius: 6px; text-align: center;
     background: var(--tomato); color: var(--surface); }
 
-  main .wrap { padding-block: 8px 48px; }
+  main .wrap { padding-block: 16px calc(100px + env(safe-area-inset-bottom, 0px)); }
   section { display: grid; gap: 14px; }
 
-  /* ---- summary ledger ---- */
-  .ledger { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--surface);
-    border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
-  .ledger button { border: 0; background: none; text-align: left; padding: 14px 14px 12px; cursor: pointer; display: grid; gap: 2px; }
-  .ledger button + button { border-left: 1px solid var(--line); }
-  .ledger button.on { background: var(--sunken); }
-  .ledger b { font: 400 30px/1.1 var(--display); font-variant-numeric: tabular-nums; }
-  .ledger span { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  /* ---- bottom tab bar ---- */
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .tabbar-inner { max-width: 680px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); }
+  .tabbar button { border: 0; background: none; cursor: pointer; display: grid; justify-items: center; gap: 3px;
+    padding: 9px 0 10px; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .tabbar button.active { color: var(--basil); }
+  .tabbar .ico-wrap { position: relative; display: grid; }
+  .tabbar .count { position: absolute; top: -5px; left: 15px; }
+
+  /* ---- place summary card ---- */
+  .hero { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: grid; gap: 14px; box-shadow: var(--shadow); }
+  .hero-top { display: flex; align-items: center; gap: 12px; }
+  .place-ico { width: 46px; height: 46px; flex: none; border-radius: 14px; display: grid; place-items: center;
+    background: var(--basil-soft); color: var(--basil); }
+  .hero h2 { margin: 0; font: 400 24px/1.1 var(--display); }
+  .hero .sub { color: var(--muted); font-size: 13px; margin-top: 3px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .stat { border: 1px solid transparent; background: var(--sunken); border-radius: 12px; padding: 9px 10px; cursor: pointer;
+    text-align: left; display: grid; gap: 1px; min-width: 0; }
+  .stat:hover { border-color: var(--line-strong); }
+  .stat.on { border-color: var(--basil); box-shadow: inset 0 0 0 1px var(--basil); background: var(--surface); }
+  .stat b { font: 400 24px/1.15 var(--display); font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .stat.zero b { color: var(--muted); }
   .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+  .hero-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .hero-actions .btn { display: flex; justify-content: center; align-items: center; gap: 6px; min-width: 0;
+    white-space: normal; text-align: center; line-height: 1.2; }
+  .hero-actions .btn svg { flex: none; }
+
+  /* ---- overview: storage cards ---- */
+  .sec-title { display: flex; justify-content: space-between; align-items: baseline; margin: 6px 2px -4px; }
+  .sec-title h3 { margin: 0; font: 400 18px var(--display); }
+  .sec-title span { color: var(--muted); font-size: 13px; }
+  .stores { display: grid; gap: 8px; }
+  .store { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; text-align: left;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; cursor: pointer; box-shadow: var(--shadow); }
+  .store:hover { border-color: var(--line-strong); }
+  .store .place-ico { width: 42px; height: 42px; border-radius: 12px; }
+  .store .title { font: 400 18px var(--display); }
+  .store .pills { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
+  .store .chev { color: var(--muted); }
+  .pill { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--sunken); color: var(--muted); }
+  .pill.bad { background: var(--tomato-soft); color: var(--tomato); }
+  .pill.soon { background: var(--turmeric-soft); color: var(--turmeric); }
+  .pill.ok { background: var(--basil-soft); color: var(--basil); }
+  .allgood { background: var(--surface); border: 1px dashed var(--line-strong); border-radius: 14px; padding: 16px; text-align: center; color: var(--muted); }
 
   /* ---- toolbar ---- */
   .search { position: relative; }
@@ -100,12 +149,9 @@
   .field { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; min-width: 0; }
   .field:hover { border-color: var(--line-strong); }
   .search .field { padding-left: 38px; }
-  .chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-  .chip { flex: none; border: 1px solid var(--line); background: var(--surface); border-radius: 999px;
-    padding: 6px 12px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--muted); }
-  .chip.on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
-  .chip.sort { margin-left: auto; display: flex; align-items: center; gap: 6px; }
-  .sep { flex: 1 0 0; }
+  .toolbar { display: flex; gap: 8px; }
+  .toolbar .search { flex: 1 1 auto; min-width: 0; }
+  .sort-sel { width: auto; flex: none; max-width: 42%; }
 
   .btn { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 10px 16px;
     cursor: pointer; font-weight: 600; white-space: nowrap; }
@@ -215,6 +261,8 @@
   .cat-chip button { border: 0; background: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
     color: var(--muted); display: grid; place-items: center; font-size: 15px; line-height: 1; }
   .cat-chip button:hover { color: var(--tomato); background: var(--tomato-soft); }
+  .cat-chip.preview { padding-right: 12px; justify-self: start; }
+  .form .err { grid-column: 1 / -1; color: var(--tomato); font-size: 13px; margin: 0; min-height: 1em; }
   .dlg-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
   textarea.field { min-height: 170px; font: 12px/1.45 var(--mono); resize: vertical; }
   @media (max-width: 520px) {
@@ -223,7 +271,7 @@
     .form { grid-template-columns: 1fr 1fr; }
   }
 
-  .toast { position: fixed; left: 50%; translate: -50% 0; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 20;
+  .toast { position: fixed; left: 50%; translate: -50% 0; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); z-index: 20;
     background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 14px; max-width: calc(100vw - 32px); box-shadow: var(--shadow); }
 </style>
 
@@ -243,11 +291,7 @@
       </div>
       <button class="icon-btn" id="themeBtn" aria-label="Switch theme" title="Switch theme"></button>
     </div>
-    <nav class="seg">
-      <button id="tabStock" data-tab="stock" class="active">Stock</button>
-      <button id="tabShop" data-tab="shop">Shopping <span id="shopBadge" class="count" hidden></span></button>
-      <button id="tabSettings" data-tab="settings">Settings</button>
-    </nav>
+    <nav class="loc-tabs" id="locTabs" aria-label="Storage places"></nav>
   </div>
 </header>
 
@@ -258,21 +302,34 @@
       <button class="btn" id="clearSampleBtn">Clear examples</button>
     </div>
 
-    <div class="ledger">
-      <button data-filter="expiring"><b id="statExp">0</b><span><i class="dot" style="background:var(--tomato)"></i>Use soon</span></button>
-      <button data-filter="low"><b id="statLow">0</b><span><i class="dot" style="background:var(--turmeric)"></i>Running low</span></button>
-      <button data-filter="all"><b id="statAll">0</b><span><i class="dot" style="background:var(--basil)"></i>In pantry</span></button>
-    </div>
-
-    <div class="row">
-      <div class="search grow">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="m11 11 3.5 3.5" stroke-linecap="round"/></svg>
-        <input id="search" class="field" type="search" placeholder="Search your pantry" aria-label="Search">
+    <div class="hero" id="hero">
+      <div class="hero-top">
+        <div class="place-ico" id="heroIcon"></div>
+        <div><h2 id="heroTitle">Overview</h2><div class="sub" id="heroSub"></div></div>
       </div>
-      <button class="btn primary" id="addBtn">Add item</button>
+      <div class="stats" id="stats">
+        <button class="stat" data-filter="all"><b id="statAll">0</b><span>Items</span></button>
+        <button class="stat" data-filter="expiring"><b id="statExp">0</b><span><i class="dot" style="background:var(--tomato)"></i>Use soon</span></button>
+        <button class="stat" data-filter="low"><b id="statLow">0</b><span><i class="dot" style="background:var(--turmeric)"></i>Low</span></button>
+        <button class="stat" data-filter="out"><b id="statOut">0</b><span><i class="dot" style="background:var(--line-strong)"></i>Out</span></button>
+      </div>
+      <div class="hero-actions">
+        <button class="btn primary" id="addBtn"></button>
+        <button class="btn" id="addCatBtn"></button>
+      </div>
     </div>
 
-    <div class="chips" id="locChips" role="toolbar" aria-label="Filter by location"></div>
+    <div class="toolbar">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="m11 11 3.5 3.5" stroke-linecap="round"/></svg>
+        <input id="search" class="field" type="search" placeholder="Search all items" aria-label="Search">
+      </div>
+      <select id="sortSel" class="field sort-sel" aria-label="Group or sort items">
+        <option value="category">By category</option>
+        <option value="expiry">By best before</option>
+        <option value="name">A to Z</option>
+      </select>
+    </div>
 
     <div id="stockList"></div>
   </section>
@@ -309,18 +366,15 @@
       </div>
     </div>
     <div class="group">
-      <h2>Shelves</h2>
-      <p class="hint">Where you keep things. Separate with commas.</p>
+      <h2>Storage places</h2>
+      <p class="hint">Each place gets its own tab on the Stock screen. Separate with commas.</p>
       <div class="row"><input id="locInput" class="field grow" aria-label="Locations"><button class="btn" id="locSave">Save</button></div>
     </div>
     <div class="group">
       <h2>Categories</h2>
       <p class="hint">Add your own or remove the ones you don't use. The number shows how many items are in each.</p>
       <div class="cat-list" id="catList"></div>
-      <form id="catForm" class="row" autocomplete="off">
-        <input id="catInput" class="field grow" placeholder="New category, e.g. Baby care" aria-label="New category">
-        <button class="btn primary">Add</button>
-      </form>
+      <div class="actions"><button class="btn" id="addCatBtn2">Add category</button></div>
     </div>
     <div class="group">
       <h2>Reset</h2>
@@ -328,6 +382,12 @@
     </div>
   </section>
 </div></main>
+
+<nav class="tabbar" aria-label="Sections"><div class="tabbar-inner">
+  <button id="tabStock" data-tab="stock" class="active"><span class="ico-wrap" id="icoStock"></span>Stock</button>
+  <button id="tabShop" data-tab="shop"><span class="ico-wrap"><span id="icoShop"></span><span id="shopBadge" class="count" hidden></span></span>Shopping</button>
+  <button id="tabSettings" data-tab="settings"><span class="ico-wrap" id="icoSettings"></span>Settings</button>
+</div></nav>
 
 <dialog id="itemDialog">
   <form id="itemForm" autocomplete="off">
@@ -340,7 +400,7 @@
       <label>Quantity<input id="fQty" class="field" name="qty" type="number" min="0" step="any" value="1" required></label>
       <label>Unit<input id="fUnit" class="field" name="unit" placeholder="pcs, kg, L" list="units"></label>
       <label>Category<select id="fCat" class="field" name="category"></select></label>
-      <label>Shelf<select id="fLoc" class="field" name="location"></select></label>
+      <label>Stored in<select id="fLoc" class="field" name="location"></select></label>
       <label>Best before<input id="fExp" class="field" name="expiry" type="date"></label>
       <label>Low at<input id="fLow" class="field" name="low" type="number" min="0" step="any" placeholder="1"></label>
       <label>Notes<input id="fNotes" class="field" name="notes"></label>
@@ -352,6 +412,22 @@
         <button type="button" class="btn" id="cancelBtn">Cancel</button>
         <button type="submit" class="btn primary">Save</button>
       </div>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="catDialog">
+  <form id="catDlgForm" autocomplete="off">
+    <h3>Add category</h3>
+    <div class="form">
+      <label class="full">Name<input id="cName" class="field" name="cname" required maxlength="40" placeholder="e.g. Baby care"></label>
+      <label>Icon<input id="cIcon" class="field" name="cicon" maxlength="8" placeholder="Optional"></label>
+      <div class="stack"><span class="label-row"><label>Preview</label></span><span class="cat-chip preview" id="cPreview"></span></div>
+      <p class="err" id="cError" role="alert"></p>
+    </div>
+    <div class="dlg-actions" style="justify-content:flex-end">
+      <button type="button" class="btn" id="catCancel">Cancel</button>
+      <button type="submit" class="btn primary">Add category</button>
     </div>
   </form>
 </dialog>
@@ -396,6 +472,25 @@ const ICONS = {
   system: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="9" cy="9" r="6.5"/><path d="M9 2.5v13a6.5 6.5 0 0 0 0-13Z" fill="currentColor"/></svg>',
   light: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="3.5"/><path d="M9 1.5v1.8M9 14.7v1.8M1.5 9h1.8M14.7 9h1.8M3.7 3.7l1.3 1.3M13 13l1.3 1.3M3.7 14.3 5 13M13 5l1.3-1.3"/></svg>',
   dark: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M15 10.5A6.5 6.5 0 0 1 7.5 3a6.5 6.5 0 1 0 7.5 7.5Z"/></svg>',
+  chev: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>',
+};
+// Line icons for storage places and the tab bar (24px grid, stroked in currentColor)
+const svg = (d, size = 22) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const PLACE_PATHS = {
+  overview: '<rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/>',
+  pantry: '<rect x="4" y="2.5" width="16" height="19" rx="2"/><path d="M4 9h16M4 15.5h16M7.5 6.5h3M13.5 6.5h3M8 13v-1.5h3V13M13.5 19v-1.5h3V19"/>',
+  fridge: '<rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M5 9.5h14M8.5 5.5v2M8.5 12.5v3.5"/>',
+  freezer: '<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.5 4.5 12 6l2.5-1.5M9.5 19.5 12 18l2.5 1.5M5 11l1.5 1L5 13M19 11l-1.5 1 1.5 1"/>',
+  box: '<path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5zM3.5 7.5 12 12l8.5-4.5M12 12v9"/>',
+};
+function placeIcon(loc, size) {
+  const k = !loc ? 'overview' : /fridge|refrig/i.test(loc) ? 'fridge' : /freez/i.test(loc) ? 'freezer' : /pantry|cupboard|shelf|cabinet|larder|rack/i.test(loc) ? 'pantry' : 'box';
+  return svg(PLACE_PATHS[k], size);
+}
+const TAB_ICONS = {
+  stock: '<path d="M8.5 2.5h7v3h-7z"/><rect x="5" y="5.5" width="14" height="16" rx="4"/><path d="M5 13h14"/>',
+  shop: '<path d="M3.5 9h17l-1.6 9.3a2 2 0 0 1-2 1.7H7.1a2 2 0 0 1-2-1.7zM8.5 9l3-5.5M15.5 9l-3-5.5M9 13v3M15 13v3"/>',
+  settings: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
 };
 
 // ---- theme (per-viewer preference) ----
@@ -418,6 +513,7 @@ document.querySelectorAll('.theme-opt').forEach(b => b.onclick = () => applyThem
 applyTheme(themeMode);
 
 // ---- storage ----
+const VIEW_KEY = 'pantry.place';
 let firstRun = false;
 let state = load();
 
@@ -446,6 +542,7 @@ function normalize(s) {
     shopping: [], locations: [...DEFAULT_LOCATIONS], ...s, items,
     categories: sortCats(s.categories || [...DEFAULT_CATEGORIES, ...items.map(i => i.category).filter(Boolean)]),
     history: s.history || [...new Set(items.map(i => i.name))],
+    catIcons: s.catIcons || {},
   };
 }
 function remember(name) {
@@ -524,12 +621,13 @@ const NAME_ICONS = [
 const CATEGORY_ICONS = { produce: '🥬', dairy: '🧀', 'meat & fish': '🍗', bakery: '🍞', 'grains & lentils': '🫘', flours: '🌾', international: '🌏', canned: '🥫',
   spices: '🧂', snacks: '🍪', drinks: '🧃', frozen: '🧊', household: '🧼', oils: '🫗',
   masalas: '🌶️', toiletries: '🧴', 'dog food': '🐕', 'dog snacks': '🐶', 'dog treats': '🦴', general: '🛒', miscellaneous: '📦' };
+const catIcon = (c) => (c && (state.catIcons[c] || CATEGORY_ICONS[c.toLowerCase()])) || '';
 function autoIcon(name = '', category = '', location = '') {
   const n = name.toLowerCase();
   // Dog items keep their dog icon even when the name mentions a food (e.g. "chicken jerky")
-  if (/^dog /i.test(category)) return CATEGORY_ICONS[category.toLowerCase()] || '🐕';
+  if (/^dog /i.test(category)) return catIcon(category) || '🐕';
   for (const [re, icon] of NAME_ICONS) if (re.test(n)) return icon;
-  return CATEGORY_ICONS[category.toLowerCase()] || (/freez/i.test(location) ? '🧊' : '🫙');
+  return catIcon(category) || (/freez/i.test(location) ? '🧊' : '🫙');
 }
 const itemIcon = (i) => i.icon || autoIcon(i.name, i.category, i.location);
 
@@ -549,22 +647,30 @@ function shoppingView() {
 }
 
 // ---- view state ----
-let view = { loc: '', status: 'all', sort: 'location' };
-const SORTS = { location: 'Shelf', category: 'Category', expiry: 'Best before', name: 'A–Z' };
+// loc '' = Overview (all places). status filters come from the summary tiles and reset when switching place.
+let view = { loc: '', status: 'all', sort: 'category' };
+try { view.loc = localStorage.getItem(VIEW_KEY) || ''; } catch (e) {}
+const STATUS = {
+  all: () => true,
+  expiring: isExpiring,
+  low: (i) => isLow(i) && i.qty > 0,
+  out: (i) => i.qty <= 0,
+};
+const STATUS_LABEL = { expiring: 'Use soon', low: 'Running low', out: 'Out of stock' };
+function stats(items) {
+  return { all: items.length, expiring: items.filter(STATUS.expiring).length, low: items.filter(STATUS.low).length, out: items.filter(STATUS.out).length };
+}
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 // ---- rendering ----
 function render() {
-  $('#statExp').textContent = state.items.filter(isExpiring).length;
-  $('#statLow').textContent = state.items.filter(isLow).length;
-  $('#statAll').textContent = state.items.length;
   $('#sampleBanner').hidden = !state.items.some(i => i.sample);
-
   $('#fLoc').innerHTML = state.locations.map(l => `<option>${esc(l)}</option>`).join('');
   fillCategorySelect();
   $('#knownItems').innerHTML = sortCats(state.history).map(n => `<option>${esc(n)}</option>`).join('');
   $('#catList').innerHTML = state.categories.map(c => {
     const n = state.items.filter(i => i.category === c).length;
-    return `<span class="cat-chip">${esc(autoIcon('', c))} ${esc(c)}${n ? ` <small>${n}</small>` : ''}<button type="button" aria-label="Remove ${esc(c)}" title="Remove ${esc(c)}" data-cat="${esc(c)}">×</button></span>`;
+    return `<span class="cat-chip">${esc(catIcon(c) || '🏷️')} ${esc(c)}${n ? ` <small>${n}</small>` : ''}<button type="button" aria-label="Remove ${esc(c)}" title="Remove ${esc(c)}" data-cat="${esc(c)}">×</button></span>`;
   }).join('') || '<p class="hint">No categories yet.</p>';
   $('#catList').querySelectorAll('[data-cat]').forEach(b => b.onclick = () => removeCategory(b.dataset.cat));
   $('#locInput').value = state.locations.join(', ');
@@ -574,25 +680,50 @@ function render() {
   renderShop();
 }
 
-function renderChips() {
-  const locs = ['', ...state.locations];
-  $('#locChips').innerHTML = locs.map(l => `<button class="chip ${view.loc === l ? 'on' : ''}" data-loc="${esc(l)}">${l ? esc(l) : 'All'}</button>`).join('')
-    + `<span class="sep"></span><button class="chip sort" id="sortChip" title="Change sort">Sort: ${SORTS[view.sort]}</button>`;
-  $('#locChips').querySelectorAll('[data-loc]').forEach(b => b.onclick = () => { view.loc = b.dataset.loc; renderStock(); });
-  $('#sortChip').onclick = () => {
-    const keys = Object.keys(SORTS);
-    view.sort = keys[(keys.indexOf(view.sort) + 1) % keys.length]; renderStock();
-  };
+function setPlace(loc) {
+  view.loc = loc; view.status = 'all'; $('#search').value = '';
+  try { localStorage.setItem(VIEW_KEY, loc); } catch (e) {}
+  renderStock();
+  window.scrollTo({ top: 0 });
+}
+
+function renderTabs() {
+  const tabs = ['', ...state.locations].map(l => {
+    const items = l ? state.items.filter(i => i.location === l) : state.items;
+    const needs = items.some(i => STATUS.expiring(i) || STATUS.out(i));
+    return `<button class="loc-tab ${view.loc === l ? 'active' : ''}" data-loc="${esc(l)}" aria-current="${view.loc === l ? 'page' : 'false'}">
+      ${l ? esc(l) : 'Overview'} <span class="n">${items.length}</span>${needs && l ? '<i class="alert" title="Needs attention"></i>' : ''}</button>`;
+  });
+  $('#locTabs').innerHTML = tabs.join('');
+  $('#locTabs').querySelectorAll('[data-loc]').forEach(b => b.onclick = () => setPlace(b.dataset.loc));
+  $('#locTabs .active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+
+function renderHero(placeItems) {
+  const st = stats(placeItems);
+  const cats = new Set(placeItems.map(i => i.category).filter(Boolean)).size;
+  $('#heroIcon').innerHTML = placeIcon(view.loc, 24);
+  $('#heroTitle').textContent = view.loc || 'Overview';
+  $('#heroSub').textContent = view.loc
+    ? `${plural(st.all, 'item')} · ${plural(cats, 'category').replace('categorys', 'categories')}`
+    : `${plural(st.all, 'item')} across ${plural(state.locations.length, 'place')}`;
+  for (const [k, id] of [['all', '#statAll'], ['expiring', '#statExp'], ['low', '#statLow'], ['out', '#statOut']]) {
+    $(id).textContent = st[k];
+    $(id).parentElement.classList.toggle('zero', !st[k] && k !== 'all');
+  }
+  document.querySelectorAll('.stat').forEach(b => b.classList.toggle('on', b.dataset.filter === view.status && view.status !== 'all'));
+  $('#addBtn').innerHTML = `${ICONS.plus} Add item`;
+  $('#addBtn').title = view.loc ? `Add an item to ${view.loc}` : 'Add an item';
+  $('#addCatBtn').innerHTML = `${ICONS.plus} Add category`;
+  $('#search').placeholder = view.loc ? `Search ${view.loc}` : 'Search all items';
+  $('#sortSel').hidden = !view.loc;
+  $('#sortSel').value = view.sort;
 }
 
 function renderStock() {
-  renderChips();
-  document.querySelectorAll('.ledger button').forEach(b => b.classList.toggle('on', b.dataset.filter === view.status && view.status !== 'all'));
-  const q = $('#search').value.trim().toLowerCase();
-  const items = state.items.filter(i =>
-    (!q || [i.name, i.category, i.notes].some(v => (v || '').toLowerCase().includes(q))) &&
-    (!view.loc || i.location === view.loc) &&
-    (view.status === 'all' || (view.status === 'expiring' && isExpiring(i)) || (view.status === 'low' && isLow(i))));
+  renderTabs();
+  const placeItems = view.loc ? state.items.filter(i => i.location === view.loc) : state.items;
+  renderHero(placeItems);
 
   const list = $('#stockList');
   if (!state.items.length) {
@@ -601,23 +732,57 @@ function renderStock() {
       <div class="row"><button class="btn primary" onclick="openItem()">Add your first item</button><button class="btn" onclick="loadSample()">Add example items</button></div></div>`;
     return;
   }
-  if (!items.length) {
-    const label = { expiring: 'Nothing needs using up soon.', low: 'Nothing is running low.' }[view.status] || 'No items match.';
-    list.innerHTML = `<div class="empty">${label}</div>`; return;
+
+  const q = $('#search').value.trim().toLowerCase();
+  const items = placeItems.filter(i =>
+    (!q || [i.name, i.category, i.notes].some(v => (v || '').toLowerCase().includes(q))) && STATUS[view.status](i));
+  const byName = (a, b) => a.name.localeCompare(b.name);
+
+  // Overview at rest: one card per place, then everything that needs attention
+  if (!view.loc && !q && view.status === 'all') {
+    const cards = state.locations.map(l => {
+      const st = stats(state.items.filter(i => i.location === l));
+      const pills = [
+        st.expiring && `<span class="pill bad">${st.expiring} use soon</span>`,
+        st.low && `<span class="pill soon">${st.low} low</span>`,
+        st.out && `<span class="pill">${st.out} out</span>`,
+      ].filter(Boolean).join('') || (st.all ? '<span class="pill ok">All good</span>' : '<span class="pill">Empty</span>');
+      return `<button class="store" data-loc="${esc(l)}"><span class="place-ico">${placeIcon(l)}</span>
+        <span><span class="title">${esc(l)}</span> <span class="hint">· ${plural(st.all, 'item')}</span><span class="pills">${pills}</span></span>
+        <span class="chev">${ICONS.chev}</span></button>`;
+    }).join('');
+    const rank = (i) => { const d = daysUntil(i.expiry); return d !== null && d < 0 ? 0 : i.qty <= 0 ? 1 : isExpiring(i) ? 2 : 3; };
+    const attention = state.items.filter(i => isExpiring(i) || isLow(i))
+      .sort((a, b) => rank(a) - rank(b) || (a.expiry || '9999').localeCompare(b.expiry || '9999') || byName(a, b));
+    list.innerHTML = `<div class="sec-title"><h3>Storage</h3><span>Tap a place to open it</span></div>
+      <div class="stores">${cards}</div>
+      <div class="sec-title"><h3>Needs attention</h3><span>${attention.length ? plural(attention.length, 'item') : ''}</span></div>
+      ${attention.length ? `<div class="shelf">${attention.map(itemHTML).join('')}</div>` : '<div class="allgood">Everything is stocked and in date.</div>'}`;
+    list.querySelectorAll('.store').forEach(b => b.onclick = () => setPlace(b.dataset.loc));
+    return;
   }
 
-  const byName = (a, b) => a.name.localeCompare(b.name);
-  if (view.sort === 'expiry' || view.sort === 'name') {
+  if (!items.length) {
+    const what = view.status !== 'all' ? STATUS_LABEL[view.status].toLowerCase() : q ? `matching "${esc(q)}"` : '';
+    const where = view.loc ? ` in ${esc(view.loc)}` : '';
+    list.innerHTML = `<div class="empty">${view.status !== 'all' ? `Nothing ${what}${where}.` : q ? `No items ${what}${where}.` : `${esc(view.loc)} is empty.`}
+      ${!q && view.status === 'all' ? `<div class="row"><button class="btn primary" onclick="openItem()">Add item to ${esc(view.loc)}</button></div>` : ''}</div>`;
+    return;
+  }
+
+  const shelf = (label, group) => `<div class="shelf"><div class="shelf-label"><span>${esc(label)}</span><span>${group.length}</span></div>${group.map(itemHTML).join('')}</div>`;
+  // Overview search / tile filter: group by place. Inside a place: group by category, or a flat sorted list.
+  const groupKey = !view.loc ? 'location' : view.sort === 'category' ? 'category' : null;
+  if (!groupKey) {
     items.sort(view.sort === 'name' ? byName : (a, b) => (a.expiry || '9999').localeCompare(b.expiry || '9999') || byName(a, b));
-    list.innerHTML = `<div class="shelf"><div class="shelf-label"><span>${SORTS[view.sort]}</span><span>${items.length}</span></div>${items.map(itemHTML).join('')}</div>`;
+    list.innerHTML = shelf(view.sort === 'name' ? 'A to Z' : 'By best before', items);
     return;
   }
   const groups = {};
-  items.forEach(i => (groups[i[view.sort] || 'Unsorted'] ??= []).push(i));
-  const order = view.sort === 'location' ? state.locations : sortCats(Object.keys(groups));
+  items.forEach(i => (groups[i[groupKey] || 'No category'] ??= []).push(i));
+  const order = groupKey === 'location' ? state.locations : sortCats(Object.keys(groups));
   const keys = [...order.filter(k => groups[k]), ...Object.keys(groups).filter(k => !order.includes(k))];
-  list.innerHTML = keys.map(g =>
-    `<div class="shelf"><div class="shelf-label"><span>${esc(g)}</span><span>${groups[g].length}</span></div>${groups[g].sort(byName).map(itemHTML).join('')}</div>`).join('');
+  list.innerHTML = keys.map(g => shelf(groupKey === 'category' && catIcon(g) ? `${catIcon(g)} ${g}` : g, groups[g].sort(byName))).join('');
 }
 
 function bbLabel(date) {
@@ -638,7 +803,7 @@ function itemHTML(i) {
   if (out) bits.push(`<span class="stamp bad">Out</span>`);
   else if (low) bits.push(`<span class="stamp soon">Low</span>`);
   if (i.sample) bits.push(`<span class="stamp ex">Example</span>`);
-  const context = [view.sort === 'location' ? i.category : i.location, i.notes].filter(Boolean).map(esc).join(' <i>/</i> ');
+  const context = [!view.loc && i.location, (!view.loc || view.sort !== 'category') && i.category, i.notes].filter(Boolean).map(esc).join(' <i>/</i> ');
   if (context) bits.push(`<span>${context}</span>`);
   const step = /^(g|ml)$/i.test(i.unit || '') ? 100 : 1;
   return `<div class="item">
@@ -722,9 +887,47 @@ function updateIconPreview() {
 function fillCategorySelect(extra) {
   const sel = $('#fCat'), cur = extra ?? sel.value;
   const cats = cur && !state.categories.includes(cur) ? sortCats([...state.categories, cur]) : state.categories;
-  sel.innerHTML = '<option value="">No category</option>' + cats.map(c => `<option>${esc(c)}</option>`).join('');
-  sel.value = cur || '';
+  sel.innerHTML = '<option value="">No category</option>' + cats.map(c => `<option>${esc(c)}</option>`).join('')
+    + '<option value="__new">+ New category…</option>';
+  sel.value = cur && cur !== '__new' ? cur : '';
+  sel.dataset.prev = sel.value;
 }
+$('#fCat').addEventListener('change', (e) => {
+  const sel = e.target;
+  if (sel.value !== '__new') { sel.dataset.prev = sel.value; return; }
+  sel.value = sel.dataset.prev || '';
+  openCategoryDialog((name) => { fillCategorySelect(name); updateIconPreview(); });
+});
+
+// ---- add category dialog (from Stock, Settings, or the item form) ----
+let catDone = null;
+function openCategoryDialog(onDone) {
+  catDone = onDone || null;
+  $('#catDlgForm').reset(); $('#cError').textContent = '';
+  updateCatPreview();
+  $('#catDialog').showModal();
+  $('#cName').focus();
+}
+function updateCatPreview() {
+  const name = $('#cName').value.trim() || 'New category';
+  $('#cPreview').textContent = `${$('#cIcon').value.trim() || catIcon(name) || '🏷️'} ${name}`;
+  $('#cError').textContent = '';
+}
+['#cName', '#cIcon'].forEach(s => $(s).addEventListener('input', updateCatPreview));
+$('#catCancel').onclick = () => $('#catDialog').close();
+$('#catDlgForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = $('#cName').value.trim().replace(/\s+/g, ' ');
+  const icon = $('#cIcon').value.trim();
+  if (!name) return;
+  const existing = state.categories.find(c => c.toLowerCase() === name.toLowerCase());
+  if (existing) { $('#cError').textContent = `${existing} is already a category.`; return; }
+  state.categories = sortCats([...state.categories, name]);
+  if (icon) state.catIcons[name] = icon;
+  $('#catDialog').close();
+  save(); toast('Added category ' + name);
+  catDone?.(name); catDone = null;
+});
 function clearHistory() {
   if (!state.history.length) return toast('Item history is already empty');
   state.history = []; save(); toast('Item history cleared');
@@ -803,17 +1006,8 @@ $('#importBtn').onclick = () => {
 $('#importFile').onchange = async (e) => { $('#textArea').value = await e.target.files[0].text(); e.target.value = ''; };
 $('#locSave').onclick = () => {
   const locs = $('#locInput').value.split(',').map(s => s.trim()).filter(Boolean);
-  if (locs.length) { state.locations = [...new Set(locs)]; save(); toast('Shelves saved'); }
+  if (locs.length) { state.locations = [...new Set(locs)]; save(); toast('Storage places saved'); }
 };
-$('#catForm').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const name = $('#catInput').value.trim().replace(/\s+/g, ' ');
-  if (!name) return;
-  const existing = state.categories.find(c => c.toLowerCase() === name.toLowerCase());
-  if (existing) return toast(`${existing} is already a category`);
-  state.categories = sortCats([...state.categories, name]);
-  $('#catInput').value = ''; save(); toast('Added category ' + name);
-});
 async function removeCategory(cat) {
   const used = state.items.filter(i => i.category === cat);
   const target = state.categories.includes('Miscellaneous') && cat !== 'Miscellaneous' ? 'Miscellaneous' : '';
@@ -823,6 +1017,7 @@ async function removeCategory(cat) {
     used.forEach(i => i.category = target);
   }
   state.categories = state.categories.filter(c => c !== cat);
+  delete state.catIcons[cat];
   save(); toast('Removed category ' + cat);
 }
 $('#wipeBtn').onclick = async () => {
@@ -855,15 +1050,26 @@ function loadSample() {
 
 // ---- tabs & filters ----
 function showTab(name) {
-  document.querySelectorAll('.seg button').forEach(x => x.classList.toggle('active', x.dataset.tab === name));
+  document.querySelectorAll('.tabbar button').forEach(x => {
+    x.classList.toggle('active', x.dataset.tab === name);
+    x.setAttribute('aria-current', x.dataset.tab === name ? 'page' : 'false');
+  });
   document.querySelectorAll('main section').forEach(s => s.hidden = s.id !== 'tab-' + name);
+  $('#locTabs').hidden = name !== 'stock';
+  window.scrollTo({ top: 0 });
 }
-document.querySelectorAll('.seg button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
-document.querySelectorAll('.ledger button').forEach(b => b.onclick = () => {
-  view.status = view.status === b.dataset.filter ? 'all' : b.dataset.filter; renderStock();
+document.querySelectorAll('.tabbar button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
+$('#icoStock').innerHTML = svg(TAB_ICONS.stock);
+$('#icoShop').innerHTML = svg(TAB_ICONS.shop);
+$('#icoSettings').innerHTML = svg(TAB_ICONS.settings);
+document.querySelectorAll('.stat').forEach(b => b.onclick = () => {
+  view.status = view.status === b.dataset.filter || b.dataset.filter === 'all' ? 'all' : b.dataset.filter; renderStock();
 });
 $('#search').addEventListener('input', renderStock);
+$('#sortSel').addEventListener('change', (e) => { view.sort = e.target.value; renderStock(); });
 $('#addBtn').onclick = () => openItem();
+$('#addCatBtn').onclick = () => openCategoryDialog();
+$('#addCatBtn2').onclick = () => openCategoryDialog();
 $('#todayLabel').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
 
 if (firstRun) loadSample(); else render();
