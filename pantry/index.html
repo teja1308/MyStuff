@@ -361,7 +361,8 @@
 const KEY = 'pantry.v1';
 const THEME_KEY = 'pantry.theme';
 const DEFAULT_LOCATIONS = ['Pantry', 'Fridge', 'Freezer'];
-const DEFAULT_CATEGORIES = ['Produce', 'Dairy', 'Meat & Fish', 'Bakery', 'Grains & Lentils', 'Flours', 'International', 'Canned', 'Spices', 'Snacks', 'Drinks', 'Frozen', 'Household'];
+const DEFAULT_CATEGORIES = ['Produce', 'Dairy', 'Meat & Fish', 'Bakery', 'Grains & Lentils', 'Flours', 'Oils', 'Masalas', 'Spices', 'International',
+  'Canned', 'Snacks', 'Drinks', 'Frozen', 'Household', 'Toiletries', 'Dog Food', 'Dog Snacks', 'Dog Treats', 'General', 'Miscellaneous'];
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -483,12 +484,16 @@ const NAME_ICONS = [
   [/ketchup|sauce|soup|\bcan(ned)?\b|tinned/, '🥫'], [/jam|jelly|pickle|preserve|spread/, '🫙'],
   [/coffee/, '☕'], [/\btea\b|chai/, '🍵'], [/juice/, '🧃'], [/water/, '💧'], [/soda|cola|soft drink/, '🥤'],
   [/beer/, '🍺'], [/wine/, '🍷'], [/ice\b/, '🧊'],
-  [/soap|detergent|cleaner|bleach|dish/, '🧼'], [/toilet|tissue|paper towel|napkin/, '🧻'], [/sponge/, '🧽'], [/shampoo|lotion/, '🧴'],
+  [/soap|detergent|cleaner|bleach|dish/, '🧼'], [/toilet|tissue|paper towel|napkin/, '🧻'], [/sponge/, '🧽'], [/shampoo|lotion|conditioner|body wash/, '🧴'],
+  [/toothpaste|toothbrush/, '🪥'], [/razor/, '🪒'],
 ];
 const CATEGORY_ICONS = { produce: '🥬', dairy: '🧀', 'meat & fish': '🍗', bakery: '🍞', 'grains & lentils': '🫘', flours: '🌾', international: '🌏', canned: '🥫',
-  spices: '🧂', snacks: '🍪', drinks: '🧃', frozen: '🧊', household: '🧼', oils: '🫗' };
+  spices: '🧂', snacks: '🍪', drinks: '🧃', frozen: '🧊', household: '🧼', oils: '🫗',
+  masalas: '🌶️', toiletries: '🧴', 'dog food': '🐕', 'dog snacks': '🐶', 'dog treats': '🦴', general: '🛒', miscellaneous: '📦' };
 function autoIcon(name = '', category = '', location = '') {
   const n = name.toLowerCase();
+  // Dog items keep their dog icon even when the name mentions a food (e.g. "chicken jerky")
+  if (/^dog /i.test(category)) return CATEGORY_ICONS[category.toLowerCase()] || '🐕';
   for (const [re, icon] of NAME_ICONS) if (re.test(n)) return icon;
   return CATEGORY_ICONS[category.toLowerCase()] || (/freez/i.test(location) ? '🧊' : '🫙');
 }
