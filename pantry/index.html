@@ -111,13 +111,14 @@
     background: var(--basil-soft); color: var(--basil); }
   .hero h2 { margin: 0; font: 400 24px/1.1 var(--display); }
   .hero .sub { color: var(--muted); font-size: 13px; margin-top: 3px; }
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-  .stat { border: 1px solid transparent; background: var(--sunken); border-radius: 12px; padding: 9px 10px; cursor: pointer;
+  .stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
+  .stat { border: 1px solid transparent; background: var(--sunken); border-radius: 12px; padding: 9px 8px; cursor: pointer;
     text-align: left; display: grid; gap: 1px; min-width: 0; }
   .stat:hover { border-color: var(--line-strong); }
   .stat.on { border-color: var(--basil); box-shadow: inset 0 0 0 1px var(--basil); background: var(--surface); }
-  .stat b { font: 400 24px/1.15 var(--display); font-variant-numeric: tabular-nums; }
-  .stat span { font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .stat b { font: 400 22px/1.15 var(--display); font-variant-numeric: tabular-nums; }
+  .stat { align-content: start; }
+  .stat span { line-height: 1.2; font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px; white-space: normal; overflow-wrap: anywhere; }
   .stat.zero b { color: var(--muted); }
   .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
   .hero-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
@@ -205,6 +206,7 @@
   .stamp.soon { color: var(--turmeric); background: var(--turmeric-soft); border-color: transparent; }
   .stamp.bad { color: var(--tomato); background: var(--tomato-soft); border-color: transparent; }
   .stamp.ex { color: var(--basil); background: var(--basil-soft); border-color: transparent; }
+  .stamp.use { color: var(--basil); border-color: var(--basil); }
 
   .stepper { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
   .stepper button { width: 34px; height: 34px; border: 0; background: none; cursor: pointer; border-radius: 50%; display: grid; place-items: center; color: var(--muted); }
@@ -262,6 +264,10 @@
     color: var(--muted); display: grid; place-items: center; font-size: 15px; line-height: 1; }
   .cat-chip button:hover { color: var(--tomato); background: var(--tomato-soft); }
   .cat-chip.preview { padding-right: 12px; justify-self: start; }
+  .form .check-row { display: flex; align-items: center; gap: 10px; font: 500 14px var(--sans); letter-spacing: 0;
+    text-transform: none; color: var(--ink); padding: 4px 0; cursor: pointer; }
+  .form .check-row input { width: 20px; height: 20px; accent-color: var(--basil); margin: 0; flex: none; }
+  .form .check-row small { color: var(--muted); font-size: 12.5px; font-weight: 400; }
   .form .err { grid-column: 1 / -1; color: var(--tomato); font-size: 13px; margin: 0; min-height: 1em; }
   .dlg-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
   textarea.field { min-height: 170px; font: 12px/1.45 var(--mono); resize: vertical; }
@@ -311,6 +317,7 @@
         <button class="stat" data-filter="all"><b id="statAll">0</b><span>Items</span></button>
         <button class="stat" data-filter="expiring"><b id="statExp">0</b><span><i class="dot" style="background:var(--tomato)"></i>Use soon</span></button>
         <button class="stat" data-filter="low"><b id="statLow">0</b><span><i class="dot" style="background:var(--turmeric)"></i>Low</span></button>
+        <button class="stat" data-filter="inuse"><b id="statUse">0</b><span><i class="dot" style="background:var(--basil)"></i>In use</span></button>
         <button class="stat" data-filter="out"><b id="statOut">0</b><span><i class="dot" style="background:var(--line-strong)"></i>Out</span></button>
       </div>
       <div class="hero-actions">
@@ -405,6 +412,7 @@
       <label>Low at<input id="fLow" class="field" name="low" type="number" min="0" step="any" placeholder="1"></label>
       <label>Notes<input id="fNotes" class="field" name="notes"></label>
       <label>Icon<input id="fIcon" class="field" name="icon" maxlength="8" placeholder="Auto"></label>
+      <label class="full check-row"><input type="checkbox" id="fInUse" name="inuse"> In use <small>Opened and being used up</small></label>
     </div>
     <div class="dlg-actions">
       <button type="button" class="btn ghost danger" id="deleteItemBtn">Delete</button>
@@ -655,10 +663,12 @@ const STATUS = {
   expiring: isExpiring,
   low: (i) => isLow(i) && i.qty > 0,
   out: (i) => i.qty <= 0,
+  inuse: (i) => !!i.opened && i.qty > 0,
 };
-const STATUS_LABEL = { expiring: 'Use soon', low: 'Running low', out: 'Out of stock' };
+const STATUS_LABEL = { expiring: 'Use soon', low: 'Running low', out: 'Out of stock', inuse: 'In use' };
 function stats(items) {
-  return { all: items.length, expiring: items.filter(STATUS.expiring).length, low: items.filter(STATUS.low).length, out: items.filter(STATUS.out).length };
+  return { all: items.length, expiring: items.filter(STATUS.expiring).length, low: items.filter(STATUS.low).length,
+    inuse: items.filter(STATUS.inuse).length, out: items.filter(STATUS.out).length };
 }
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
@@ -707,7 +717,7 @@ function renderHero(placeItems) {
   $('#heroSub').textContent = view.loc
     ? `${plural(st.all, 'item')} · ${plural(cats, 'category').replace('categorys', 'categories')}`
     : `${plural(st.all, 'item')} across ${plural(state.locations.length, 'place')}`;
-  for (const [k, id] of [['all', '#statAll'], ['expiring', '#statExp'], ['low', '#statLow'], ['out', '#statOut']]) {
+  for (const [k, id] of [['all', '#statAll'], ['expiring', '#statExp'], ['low', '#statLow'], ['inuse', '#statUse'], ['out', '#statOut']]) {
     $(id).textContent = st[k];
     $(id).parentElement.classList.toggle('zero', !st[k] && k !== 'all');
   }
@@ -800,6 +810,7 @@ function itemHTML(i) {
     else if (d <= 3) bits.push(`<span class="stamp soon">BB ${bbLabel(i.expiry)} · ${d}d</span>`);
     else bits.push(`<span class="stamp ok">BB ${bbLabel(i.expiry)}</span>`);
   }
+  if (STATUS.inuse(i)) { const o = -daysUntil(i.opened); bits.push(`<span class="stamp use" title="Opened ${esc(i.opened)}">In use${o > 0 ? ` · ${o}d` : ''}</span>`); }
   if (out) bits.push(`<span class="stamp bad">Out</span>`);
   else if (low) bits.push(`<span class="stamp soon">Low</span>`);
   if (i.sample) bits.push(`<span class="stamp ex">Example</span>`);
@@ -836,6 +847,7 @@ function renderShop() {
 function bump(id, delta) {
   const i = state.items.find(x => x.id === id);
   i.qty = Math.max(0, +(i.qty + delta).toFixed(3));
+  if (i.qty <= 0) i.opened = '';
   save();
 }
 
@@ -849,6 +861,7 @@ function openItem(id) {
   fillCategorySelect(i?.category);
   if (i) for (const k of ['name', 'qty', 'unit', 'category', 'location', 'expiry', 'low', 'notes', 'icon']) f[k].value = i[k] ?? '';
   else if (view.loc) f.location.value = view.loc;
+  f.inuse.checked = !!i?.opened;
   updateIconPreview();
   $('#itemDialog').showModal();
   f.name.focus();
@@ -863,6 +876,9 @@ $('#itemForm').addEventListener('submit', (e) => {
     low: f.low.value === '' ? '' : Number(f.low.value), notes: f.notes.value.trim(), icon: f.icon.value.trim(),
   };
   if (!data.name) return;
+  // Keep the original opened date when an in-use item is edited
+  const prev = editingId && state.items.find(x => x.id === editingId);
+  data.opened = f.inuse.checked ? (prev?.opened || isoDay()) : '';
   remember(data.name);
   if (editingId) {
     const it = state.items.find(x => x.id === editingId);
@@ -1029,18 +1045,19 @@ $('#sampleBtn').onclick = () => { loadSample(); toast('Example items added'); };
 $('#clearSampleBtn').onclick = () => { state.items = state.items.filter(i => !i.sample); save(); toast('Examples cleared'); };
 
 function loadSample() {
-  const mk = (name, qty, unit, category, location, expiryDays, low) =>
-    ({ id: uid(), name, qty, unit, category, location, expiry: expiryDays == null ? '' : isoDay(expiryDays), low, notes: '', added: isoDay(), sample: true });
+  const mk = (name, qty, unit, category, location, expiryDays, low, openedDaysAgo) =>
+    ({ id: uid(), name, qty, unit, category, location, expiry: expiryDays == null ? '' : isoDay(expiryDays), low, notes: '', added: isoDay(),
+       opened: openedDaysAgo == null ? '' : isoDay(-openedDaysAgo), sample: true });
   state.items.push(
-    mk('Milk', 1, 'L', 'Dairy', 'Fridge', 2, 1),
+    mk('Milk', 1, 'L', 'Dairy', 'Fridge', 2, 1, 1),
     mk('Eggs', 4, 'pcs', 'Dairy', 'Fridge', 10, 6),
     mk('Greek yogurt', 2, 'pcs', 'Dairy', 'Fridge', 6, 1),
     mk('Spinach', 1, 'pack', 'Produce', 'Fridge', -1, ''),
     mk('Tomatoes', 6, 'pcs', 'Produce', 'Fridge', 5, 3),
-    mk('Basmati rice', 2, 'kg', 'Grains & Lentils', 'Pantry', 200, 1),
+    mk('Basmati rice', 2, 'kg', 'Grains & Lentils', 'Pantry', 200, 1, 12),
     mk('Toor dal', 1, 'kg', 'Grains & Lentils', 'Pantry', 180, 1),
     mk('Penne', 500, 'g', 'International', 'Pantry', 300, 250),
-    mk('Atta', 5, 'kg', 'Flours', 'Pantry', 90, 1),
+    mk('Atta', 5, 'kg', 'Flours', 'Pantry', 90, 1, 5),
     mk('Chickpeas', 3, 'can', 'Canned', 'Pantry', 400, 2),
     mk('Olive oil', 0, 'bottle', 'Oils', 'Pantry', null, 1),
     mk('Frozen peas', 500, 'g', 'Frozen', 'Freezer', 120, 200),
