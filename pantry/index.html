@@ -47,6 +47,7 @@
   }
 
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html { background: var(--bg); }
   body { color: var(--ink); font: 15px/1.45 var(--sans); -webkit-font-smoothing: antialiased; min-height: 100vh;
     background-color: var(--bg);
@@ -204,6 +205,16 @@
   .form label { display: grid; gap: 5px; font: 500 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); min-width: 0; }
   .form .field { font: 15px var(--sans); letter-spacing: 0; text-transform: none; color: var(--ink); padding: 10px 12px; }
   .form .full { grid-column: 1 / -1; }
+  .form .stack { display: grid; gap: 5px; min-width: 0; }
+  .label-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .label-row .link { font-size: 12px; padding: 0; }
+  .cat-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cat-chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px;
+    padding: 3px 3px 3px 10px; font-size: 13px; background: var(--bg); }
+  .cat-chip small { color: var(--muted); font: 500 11px var(--mono); }
+  .cat-chip button { border: 0; background: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
+    color: var(--muted); display: grid; place-items: center; font-size: 15px; line-height: 1; }
+  .cat-chip button:hover { color: var(--tomato); background: var(--tomato-soft); }
   .dlg-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
   textarea.field { min-height: 170px; font: 12px/1.45 var(--mono); resize: vertical; }
   @media (max-width: 520px) {
@@ -303,21 +314,32 @@
       <div class="row"><input id="locInput" class="field grow" aria-label="Locations"><button class="btn" id="locSave">Save</button></div>
     </div>
     <div class="group">
+      <h2>Categories</h2>
+      <p class="hint">Add your own or remove the ones you don't use. The number shows how many items are in each.</p>
+      <div class="cat-list" id="catList"></div>
+      <form id="catForm" class="row" autocomplete="off">
+        <input id="catInput" class="field grow" placeholder="New category, e.g. Baby care" aria-label="New category">
+        <button class="btn primary">Add</button>
+      </form>
+    </div>
+    <div class="group">
       <h2>Reset</h2>
-      <div class="actions"><button class="btn danger" id="wipeBtn">Delete all data</button></div>
+      <div class="actions"><button class="btn" id="clearHistoryBtn2">Clear item name history</button><button class="btn danger" id="wipeBtn">Delete all data</button></div>
     </div>
   </section>
 </div></main>
 
 <dialog id="itemDialog">
-  <form id="itemForm">
+  <form id="itemForm" autocomplete="off">
     <h3 id="dialogTitle">Add item</h3>
     <div class="form">
-      <label class="full">Name
-        <span class="icon-row"><span class="preview" id="iconPreview">🫙</span><input id="fName" class="field" name="name" required list="knownItems" autocomplete="off"></span></label>
+      <div class="full stack">
+        <div class="label-row"><label for="fName">Name</label><button type="button" class="link" id="clearHistoryBtn">Clear history</button></div>
+        <span class="icon-row"><span class="preview" id="iconPreview">🫙</span><input id="fName" class="field" name="name" required list="knownItems" autocomplete="off"></span>
+      </div>
       <label>Quantity<input id="fQty" class="field" name="qty" type="number" min="0" step="any" value="1" required></label>
       <label>Unit<input id="fUnit" class="field" name="unit" placeholder="pcs, kg, L" list="units"></label>
-      <label>Category<input id="fCat" class="field" name="category" list="categories" placeholder="Dairy"></label>
+      <label>Category<select id="fCat" class="field" name="category"></select></label>
       <label>Shelf<select id="fLoc" class="field" name="location"></select></label>
       <label>Best before<input id="fExp" class="field" name="expiry" type="date"></label>
       <label>Low at<input id="fLow" class="field" name="low" type="number" min="0" step="any" placeholder="1"></label>
@@ -354,15 +376,15 @@
 </dialog>
 
 <datalist id="knownItems"></datalist>
-<datalist id="categories"></datalist>
 <datalist id="units"><option>pcs</option><option>g</option><option>kg</option><option>ml</option><option>L</option><option>pack</option><option>can</option><option>bottle</option><option>dozen</option></datalist>
 
 <script>
 const KEY = 'pantry.v1';
 const THEME_KEY = 'pantry.theme';
 const DEFAULT_LOCATIONS = ['Pantry', 'Fridge', 'Freezer'];
-const DEFAULT_CATEGORIES = ['Produce', 'Dairy', 'Meat & Fish', 'Bakery', 'Grains & Lentils', 'Flours', 'Oils', 'Masalas', 'Spices', 'International',
-  'Canned', 'Snacks', 'Drinks', 'Frozen', 'Household', 'Toiletries', 'Dog Food', 'Dog Snacks', 'Dog Treats', 'General', 'Miscellaneous'];
+const sortCats = (list) => [...new Set(list)].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+const DEFAULT_CATEGORIES = sortCats(['Produce', 'Dairy', 'Meat & Fish', 'Bakery', 'Grains & Lentils', 'Flours', 'Oils', 'Masalas', 'Spices', 'International',
+  'Canned', 'Snacks', 'Drinks', 'Frozen', 'Household', 'Toiletries', 'Dog Food', 'Dog Snacks', 'Dog Treats', 'General', 'Miscellaneous']);
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -411,11 +433,23 @@ function load() {
         if (i.category === 'Grains & Pasta') i.category = isPasta.test(i.name) ? 'International' : 'Grains & Lentils';
         if (i.category === 'Grains & Lentils' && isFlour.test(i.name)) i.category = 'Flours';
       });
-      return { locations: DEFAULT_LOCATIONS, shopping: [], ...s };
+      return normalize(s);
     }
   } catch (e) {}
   firstRun = true;
-  return { items: [], shopping: [], locations: [...DEFAULT_LOCATIONS] };
+  return normalize({});
+}
+// Fill in fields added in later versions: own category list (seeded from defaults + categories in use) and item name history
+function normalize(s) {
+  const items = Array.isArray(s.items) ? s.items : [];
+  return {
+    shopping: [], locations: [...DEFAULT_LOCATIONS], ...s, items,
+    categories: sortCats(s.categories || [...DEFAULT_CATEGORIES, ...items.map(i => i.category).filter(Boolean)]),
+    history: s.history || [...new Set(items.map(i => i.name))],
+  };
+}
+function remember(name) {
+  if (!state.history.some(h => h.toLowerCase() === name.toLowerCase())) state.history.push(name);
 }
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Could not save in this browser. Changes last until you close the page.'); }
@@ -526,9 +560,13 @@ function render() {
   $('#sampleBanner').hidden = !state.items.some(i => i.sample);
 
   $('#fLoc').innerHTML = state.locations.map(l => `<option>${esc(l)}</option>`).join('');
-  const cats = [...new Set([...DEFAULT_CATEGORIES, ...state.items.map(i => i.category).filter(Boolean)])];
-  $('#categories').innerHTML = cats.map(c => `<option>${esc(c)}</option>`).join('');
-  $('#knownItems').innerHTML = [...new Set(state.items.map(i => i.name))].map(n => `<option>${esc(n)}</option>`).join('');
+  fillCategorySelect();
+  $('#knownItems').innerHTML = sortCats(state.history).map(n => `<option>${esc(n)}</option>`).join('');
+  $('#catList').innerHTML = state.categories.map(c => {
+    const n = state.items.filter(i => i.category === c).length;
+    return `<span class="cat-chip">${esc(autoIcon('', c))} ${esc(c)}${n ? ` <small>${n}</small>` : ''}<button type="button" aria-label="Remove ${esc(c)}" title="Remove ${esc(c)}" data-cat="${esc(c)}">×</button></span>`;
+  }).join('') || '<p class="hint">No categories yet.</p>';
+  $('#catList').querySelectorAll('[data-cat]').forEach(b => b.onclick = () => removeCategory(b.dataset.cat));
   $('#locInput').value = state.locations.join(', ');
   if (view.loc && !state.locations.includes(view.loc)) view.loc = '';
 
@@ -576,7 +614,7 @@ function renderStock() {
   }
   const groups = {};
   items.forEach(i => (groups[i[view.sort] || 'Unsorted'] ??= []).push(i));
-  const order = view.sort === 'location' ? state.locations : Object.keys(groups).sort();
+  const order = view.sort === 'location' ? state.locations : sortCats(Object.keys(groups));
   const keys = [...order.filter(k => groups[k]), ...Object.keys(groups).filter(k => !order.includes(k))];
   list.innerHTML = keys.map(g =>
     `<div class="shelf"><div class="shelf-label"><span>${esc(g)}</span><span>${groups[g].length}</span></div>${groups[g].sort(byName).map(itemHTML).join('')}</div>`).join('');
@@ -643,6 +681,7 @@ function openItem(id) {
   const i = state.items.find(x => x.id === id);
   $('#dialogTitle').textContent = i ? 'Edit item' : 'Add item';
   $('#deleteItemBtn').hidden = !i;
+  fillCategorySelect(i?.category);
   if (i) for (const k of ['name', 'qty', 'unit', 'category', 'location', 'expiry', 'low', 'notes', 'icon']) f[k].value = i[k] ?? '';
   else if (view.loc) f.location.value = view.loc;
   updateIconPreview();
@@ -655,10 +694,11 @@ $('#itemForm').addEventListener('submit', (e) => {
   const f = e.target;
   const data = {
     name: f.name.value.trim(), qty: Number(f.qty.value) || 0, unit: f.unit.value.trim(),
-    category: f.category.value.trim(), location: f.location.value, expiry: f.expiry.value,
+    category: f.category.value, location: f.location.value, expiry: f.expiry.value,
     low: f.low.value === '' ? '' : Number(f.low.value), notes: f.notes.value.trim(), icon: f.icon.value.trim(),
   };
   if (!data.name) return;
+  remember(data.name);
   if (editingId) {
     const it = state.items.find(x => x.id === editingId);
     Object.assign(it, data); delete it.sample;
@@ -678,6 +718,19 @@ function updateIconPreview() {
   f.icon.placeholder = 'Auto ' + auto;
   $('#iconPreview').textContent = f.icon.value.trim() || auto;
 }
+// Category dropdown from the user's list; keeps an item's current category even if it was removed from the list
+function fillCategorySelect(extra) {
+  const sel = $('#fCat'), cur = extra ?? sel.value;
+  const cats = cur && !state.categories.includes(cur) ? sortCats([...state.categories, cur]) : state.categories;
+  sel.innerHTML = '<option value="">No category</option>' + cats.map(c => `<option>${esc(c)}</option>`).join('');
+  sel.value = cur || '';
+}
+function clearHistory() {
+  if (!state.history.length) return toast('Item history is already empty');
+  state.history = []; save(); toast('Item history cleared');
+}
+$('#clearHistoryBtn').onclick = clearHistory;
+$('#clearHistoryBtn2').onclick = clearHistory;
 ['#fName', '#fCat', '#fLoc', '#fIcon'].forEach(s => $(s).addEventListener('input', updateIconPreview));
 $('#cancelBtn').onclick = () => $('#itemDialog').close();
 $('#deleteItemBtn').onclick = async () => {
@@ -742,7 +795,7 @@ $('#importBtn').onclick = () => {
         if (!Array.isArray(data.items)) throw new Error('no items found');
         $('#textDialog').close();
         if (!(await ask(`Replace your pantry with ${data.items.length} items from the backup?`, 'Replace'))) return;
-        state = { items: [], shopping: [], locations: [...DEFAULT_LOCATIONS], ...data };
+        state = normalize(data);
         save(); toast('Backup restored');
       } catch (err) { toast('That backup could not be read: ' + err.message); }
     } });
@@ -752,9 +805,29 @@ $('#locSave').onclick = () => {
   const locs = $('#locInput').value.split(',').map(s => s.trim()).filter(Boolean);
   if (locs.length) { state.locations = [...new Set(locs)]; save(); toast('Shelves saved'); }
 };
+$('#catForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = $('#catInput').value.trim().replace(/\s+/g, ' ');
+  if (!name) return;
+  const existing = state.categories.find(c => c.toLowerCase() === name.toLowerCase());
+  if (existing) return toast(`${existing} is already a category`);
+  state.categories = sortCats([...state.categories, name]);
+  $('#catInput').value = ''; save(); toast('Added category ' + name);
+});
+async function removeCategory(cat) {
+  const used = state.items.filter(i => i.category === cat);
+  const target = state.categories.includes('Miscellaneous') && cat !== 'Miscellaneous' ? 'Miscellaneous' : '';
+  if (used.length) {
+    const where = target ? `move to ${target}` : 'have no category';
+    if (!(await ask(`${used.length} item${used.length > 1 ? 's use' : ' uses'} ${cat}. Remove the category? ${used.length > 1 ? 'They' : 'It'} will ${where}.`, 'Remove'))) return;
+    used.forEach(i => i.category = target);
+  }
+  state.categories = state.categories.filter(c => c !== cat);
+  save(); toast('Removed category ' + cat);
+}
 $('#wipeBtn').onclick = async () => {
   if (await ask('Delete all pantry data? This cannot be undone.', 'Delete all')) {
-    state = { items: [], shopping: [], locations: [...DEFAULT_LOCATIONS] }; save(); toast('All data deleted');
+    state = normalize({}); save(); toast('All data deleted');
   }
 };
 $('#sampleBtn').onclick = () => { loadSample(); toast('Example items added'); };
