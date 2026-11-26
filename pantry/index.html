@@ -4,38 +4,42 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
 <style>
-  /* Layout: fresh, light app shell in the style of current pantry apps (Smart Pantry, NoWaste, KitchenPal):
-     sage-tinted background, white cards, one deep fresh green, pill buttons, plain sans type.
+  /* Layout: light app shell in the style of current pantry apps (Smart Pantry, NoWaste, KitchenPal), in an autumn palette:
+     parchment background, white cards, rust accent, olive for stock that is fine, mustard for low, maroon for expired/out.
      Sticky header with storage-place tabs, per-place summary card, item rows with an icon tile and stock bar, bottom tab bar. */
   :root {
-    --bg: #f5f7f2;
+    --bg: #faf5ee;          /* parchment */
     --surface: #ffffff;
-    --sunken: #eef2ec;
-    --ink: #101820;
-    --muted: #5d6772;
-    --line: #e2e7df;
-    --line-strong: #cbd3c8;
-    --green: #0d7f4e;
-    --green-ink: #ffffff;
-    --green-soft: #e2f2e9;
-    --amber: #b25e00;
-    --amber-soft: #fdf0d9;
-    --red: #c0392b;
-    --red-soft: #fce6e3;
-    --shadow: 0 1px 2px rgb(16 24 32 / .04), 0 4px 14px rgb(16 24 32 / .05);
+    --sunken: #f4ebdf;
+    --ink: #2b1d14;
+    --muted: #7a6656;
+    --line: #ecdfcf;
+    --line-strong: #d9c6b0;
+    --accent: #b4501f;      /* rust */
+    --accent-ink: #ffffff;
+    --accent-soft: #f8e4d6;
+    --ok: #5f6f24;          /* olive: in stock / in use */
+    --ok-soft: #ecefd8;
+    --amber: #96700a;       /* mustard: running low / use soon */
+    --amber-soft: #faefc8;
+    --red: #9e2a2b;         /* maroon: expired / out */
+    --red-soft: #f8e1de;
+    --shadow: 0 1px 2px rgb(60 30 10 / .05), 0 4px 14px rgb(60 30 10 / .06);
     --sans: "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
     --emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #0e1311; --surface: #161c19; --sunken: #1d2521; --ink: #e8eeea; --muted: #97a39c; --line: #252e29; --line-strong: #34403a;
-      --green: #3fbf83; --green-ink: #06140d; --green-soft: #15301f; --amber: #f0b44c; --amber-soft: #33270f; --red: #f0806f; --red-soft: #3a1c18;
+      --bg: #17110d; --surface: #211913; --sunken: #2b2119; --ink: #f3e9de; --muted: #b29e8b; --line: #34291f; --line-strong: #483a2d;
+      --accent: #e5803f; --accent-ink: #1c0e05; --accent-soft: #3b2415; --ok: #aebd5e; --ok-soft: #2a2e16;
+      --amber: #e8b84a; --amber-soft: #3a2c10; --red: #ef8473; --red-soft: #3e1d19;
       --shadow: 0 1px 2px rgb(0 0 0 / .3); color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #0e1311; --surface: #161c19; --sunken: #1d2521; --ink: #e8eeea; --muted: #97a39c; --line: #252e29; --line-strong: #34403a;
-    --green: #3fbf83; --green-ink: #06140d; --green-soft: #15301f; --amber: #f0b44c; --amber-soft: #33270f; --red: #f0806f; --red-soft: #3a1c18;
+    --bg: #17110d; --surface: #211913; --sunken: #2b2119; --ink: #f3e9de; --muted: #b29e8b; --line: #34291f; --line-strong: #483a2d;
+    --accent: #e5803f; --accent-ink: #1c0e05; --accent-soft: #3b2415; --ok: #aebd5e; --ok-soft: #2a2e16;
+    --amber: #e8b84a; --amber-soft: #3a2c10; --red: #ef8473; --red-soft: #3e1d19;
     --shadow: 0 1px 2px rgb(0 0 0 / .3); color-scheme: dark;
   }
 
@@ -47,7 +51,7 @@
   .wrap { max-width: 680px; margin: 0 auto;
     padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   input, select, textarea, button { font: inherit; color: inherit; }
-  :focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* ---- header ---- */
   header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--bg) 90%, transparent);
@@ -67,10 +71,10 @@
     border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 7px 11px;
     color: var(--muted); font-weight: 600; font-size: 13.5px; }
   .loc-tab:hover { border-color: var(--line-strong); color: var(--ink); }
-  .loc-tab.active { background: var(--green); border-color: var(--green); color: var(--green-ink); }
+  .loc-tab.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
   .loc-tab .n { font-size: 12px; font-weight: 700; opacity: .7; font-variant-numeric: tabular-nums; }
   .loc-tab .alert { width: 7px; height: 7px; border-radius: 50%; background: var(--red); }
-  .loc-tab.active .alert { background: var(--green-ink); }
+  .loc-tab.active .alert { background: var(--accent-ink); }
   .count { font-size: 10px; font-weight: 700; min-width: 17px; padding: 1px 4px; border-radius: 999px; text-align: center;
     background: var(--red); color: #fff; line-height: 1.5; }
 
@@ -85,7 +89,7 @@
   .tabbar-inner { max-width: 680px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); }
   .tabbar button { border: 0; background: none; cursor: pointer; display: grid; justify-items: center; gap: 3px;
     padding: 9px 0 10px; font-size: 12px; font-weight: 600; color: var(--muted); }
-  .tabbar button.active { color: var(--green); }
+  .tabbar button.active { color: var(--accent); }
   .tabbar .ico-wrap { position: relative; display: grid; }
   .tabbar .count { position: absolute; top: -5px; left: 15px; }
 
@@ -93,21 +97,21 @@
   .hero { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 16px; display: grid; gap: 14px; box-shadow: var(--shadow); }
   .hero-top { display: flex; align-items: center; gap: 12px; }
   .place-ico { width: 46px; height: 46px; flex: none; border-radius: 14px; display: grid; place-items: center;
-    background: var(--green-soft); color: var(--green); }
+    background: var(--accent-soft); color: var(--accent); }
   .hero h2 { margin: 0; font-size: 21px; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; }
   .hero .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
   .stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
   .stat { border: 1px solid transparent; background: var(--sunken); border-radius: 14px; padding: 10px 8px; cursor: pointer;
     text-align: left; display: grid; gap: 2px; align-content: start; min-width: 0; }
   .stat:hover { border-color: var(--line-strong); }
-  .stat.on { border-color: var(--green); background: var(--green-soft); }
+  .stat.on { border-color: var(--accent); background: var(--accent-soft); }
   .stat b { font-size: 21px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; font-variant-numeric: tabular-nums; }
   .stat span { font-size: 11px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 4px;
     line-height: 1.2; white-space: normal; overflow-wrap: anywhere; }
   .stat .dot { display: none; }
   .stat[data-filter="expiring"] b { color: var(--red); }
   .stat[data-filter="low"] b { color: var(--amber); }
-  .stat[data-filter="inuse"] b { color: var(--green); }
+  .stat[data-filter="inuse"] b { color: var(--ok); }
   .stat.zero b { color: var(--line-strong); }
   .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
   .hero-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
@@ -129,7 +133,7 @@
   .pill { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--sunken); color: var(--muted); }
   .pill.bad { background: var(--red-soft); color: var(--red); }
   .pill.soon { background: var(--amber-soft); color: var(--amber); }
-  .pill.ok { background: var(--green-soft); color: var(--green); }
+  .pill.ok { background: var(--ok-soft); color: var(--ok); }
   .allgood { background: var(--surface); border: 1px dashed var(--line-strong); border-radius: 16px; padding: 18px; text-align: center; color: var(--muted); }
 
   /* ---- toolbar & controls ---- */
@@ -137,7 +141,7 @@
   .search svg { position: absolute; left: 13px; top: 50%; translate: 0 -50%; color: var(--muted); pointer-events: none; }
   .field { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; min-width: 0; }
   .field:hover { border-color: var(--line-strong); }
-  .field:focus { border-color: var(--green); outline: none; box-shadow: 0 0 0 3px var(--green-soft); }
+  .field:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
   .search .field { padding-left: 38px; border-radius: 999px; }
   .toolbar { display: flex; gap: 8px; }
   .toolbar .search { flex: 1 1 auto; min-width: 0; }
@@ -145,14 +149,14 @@
   .btn { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 10px 18px;
     cursor: pointer; font-weight: 700; font-size: 14px; white-space: nowrap; }
   .btn:hover { border-color: var(--line-strong); background: var(--sunken); }
-  .btn.primary { background: var(--green); border-color: var(--green); color: var(--green-ink); }
-  .btn.primary:hover { filter: brightness(1.08); background: var(--green); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn.primary:hover { filter: brightness(1.08); background: var(--accent); }
   .btn.ghost { background: none; }
   .btn.danger { color: var(--red); }
   .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .grow { flex: 1 1 180px; min-width: 0; }
   .note { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; border-radius: 14px;
-    background: var(--green-soft); font-size: 14px; }
+    background: var(--accent-soft); font-size: 14px; }
   .note p { margin: 0; flex: 1 1 200px; }
   .note .btn { padding: 6px 14px; font-size: 13px; }
 
@@ -179,10 +183,10 @@
   .stamp.soon { background: var(--amber-soft); color: var(--amber); }
   .stamp.bad { background: var(--red-soft); color: var(--red); }
   .stamp.ex { background: transparent; color: var(--muted); border: 1px dashed var(--line-strong); }
-  .stamp.use { background: var(--green-soft); color: var(--green); }
+  .stamp.use { background: var(--ok-soft); color: var(--ok); }
   .stepper { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
-  .stepper button { width: 34px; height: 34px; border: 0; background: none; cursor: pointer; border-radius: 50%; display: grid; place-items: center; color: var(--green); }
-  .stepper button:hover { background: var(--green-soft); }
+  .stepper button { width: 34px; height: 34px; border: 0; background: none; cursor: pointer; border-radius: 50%; display: grid; place-items: center; color: var(--accent); }
+  .stepper button:hover { background: var(--accent-soft); }
   .stepper .n { min-width: 52px; text-align: center; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .stepper .n small { color: var(--muted); font-size: 11.5px; font-weight: 600; margin-left: 2px; }
   .empty { text-align: center; padding: 44px 16px; color: var(--muted); display: grid; gap: 14px; justify-items: center; }
@@ -197,8 +201,8 @@
   .check:last-child { border-bottom: 0; }
   .check input { appearance: none; width: 22px; height: 22px; border: 1.5px solid var(--line-strong); border-radius: 50%; margin: 0;
     display: grid; place-items: center; cursor: pointer; background: var(--surface); }
-  .check input:checked { background: var(--green); border-color: var(--green); }
-  .check input:checked::after { content: ""; width: 10px; height: 6px; border: 2px solid var(--green-ink); border-top: 0; border-right: 0; rotate: -45deg; translate: 0 -1px; }
+  .check input:checked { background: var(--accent); border-color: var(--accent); }
+  .check input:checked::after { content: ""; width: 10px; height: 6px; border: 2px solid var(--accent-ink); border-top: 0; border-right: 0; rotate: -45deg; translate: 0 -1px; }
   .check .label { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-weight: 600; overflow-wrap: anywhere; }
   .check.done .label { color: var(--muted); text-decoration: line-through; }
   .link { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 13px; padding: 4px; font-weight: 600; }
@@ -211,7 +215,7 @@
   .group h2 { margin: 0; font-size: 16px; font-weight: 800; letter-spacing: -.01em; }
   .themes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .theme-opt { border: 1px solid var(--line); border-radius: 14px; padding: 10px; background: var(--bg); cursor: pointer; display: grid; gap: 8px; font-size: 13px; font-weight: 700; text-align: left; }
-  .theme-opt.on { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
+  .theme-opt.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
   .swatch { height: 34px; border-radius: 9px; border: 1px solid var(--line); display: flex; overflow: hidden; }
   .swatch span { flex: 1; }
   .cat-list { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -226,7 +230,7 @@
   /* ---- dialogs ---- */
   dialog { border: 1px solid var(--line); border-radius: 24px; background: var(--surface); color: var(--ink);
     width: min(480px, calc(100vw - 32px)); padding: 20px; box-shadow: 0 24px 60px rgb(0 0 0 / .18); }
-  dialog::backdrop { background: rgb(10 16 13 / .45); backdrop-filter: blur(2px); }
+  dialog::backdrop { background: rgb(25 14 6 / .45); backdrop-filter: blur(2px); }
   dialog h3 { margin: 0 0 16px; font-size: 19px; font-weight: 800; letter-spacing: -.02em; }
   .icon-row { display: flex; gap: 8px; align-items: center; }
   .icon-row .preview { width: 46px; height: 46px; flex: none; display: grid; place-items: center; font-size: 24px; font-family: var(--emoji);
@@ -239,7 +243,7 @@
   .label-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
   .label-row .link { font-size: 12px; padding: 0; }
   .form .check-row { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--ink); padding: 4px 0; cursor: pointer; }
-  .form .check-row input { width: 20px; height: 20px; accent-color: var(--green); margin: 0; flex: none; }
+  .form .check-row input { width: 20px; height: 20px; accent-color: var(--accent); margin: 0; flex: none; }
   .form .check-row small { color: var(--muted); font-size: 12.5px; font-weight: 500; }
   .form .err { grid-column: 1 / -1; color: var(--red); font-size: 13px; margin: 0; min-height: 1em; }
   .dlg-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
@@ -257,10 +261,10 @@
     <div class="top">
       <div class="brand">
         <svg width="38" height="38" viewBox="0 0 38 38" aria-hidden="true">
-          <rect width="38" height="38" rx="11" fill="var(--green)"/>
-          <rect x="14" y="8" width="10" height="4" rx="1.5" fill="var(--green-ink)"/>
-          <rect x="10.75" y="13.75" width="16.5" height="16.5" rx="4.5" fill="none" stroke="var(--green-ink)" stroke-width="1.8"/>
-          <rect x="13" y="21" width="12" height="7" rx="2.5" fill="var(--green-ink)"/>
+          <rect width="38" height="38" rx="11" fill="var(--accent)"/>
+          <rect x="14" y="8" width="10" height="4" rx="1.5" fill="var(--accent-ink)"/>
+          <rect x="10.75" y="13.75" width="16.5" height="16.5" rx="4.5" fill="none" stroke="var(--accent-ink)" stroke-width="1.8"/>
+          <rect x="13" y="21" width="12" height="7" rx="2.5" fill="var(--accent-ink)"/>
         </svg>
         <div>
           <h1>Pantry</h1>
@@ -289,7 +293,7 @@
         <button class="stat" data-filter="all"><b id="statAll">0</b><span>Items</span></button>
         <button class="stat" data-filter="expiring"><b id="statExp">0</b><span><i class="dot" style="background:var(--red)"></i>Use soon</span></button>
         <button class="stat" data-filter="low"><b id="statLow">0</b><span><i class="dot" style="background:var(--amber)"></i>Low</span></button>
-        <button class="stat" data-filter="inuse"><b id="statUse">0</b><span><i class="dot" style="background:var(--green)"></i>In use</span></button>
+        <button class="stat" data-filter="inuse"><b id="statUse">0</b><span><i class="dot" style="background:var(--ok)"></i>In use</span></button>
         <button class="stat" data-filter="out"><b id="statOut">0</b><span><i class="dot" style="background:var(--line-strong)"></i>Out</span></button>
       </div>
       <div class="hero-actions">
@@ -330,9 +334,9 @@
     <div class="group">
       <h2>Appearance</h2>
       <div class="themes" id="themeOpts">
-        <button class="theme-opt" data-mode="system"><div class="swatch"><span style="background:#f5f7f2"></span><span style="background:#0e1311"></span></div>System</button>
-        <button class="theme-opt" data-mode="light"><div class="swatch"><span style="background:#f5f7f2"></span><span style="background:#0d7f4e;flex:.35"></span></div>Light</button>
-        <button class="theme-opt" data-mode="dark"><div class="swatch"><span style="background:#0e1311"></span><span style="background:#3fbf83;flex:.35"></span></div>Dark</button>
+        <button class="theme-opt" data-mode="system"><div class="swatch"><span style="background:#faf5ee"></span><span style="background:#17110d"></span></div>System</button>
+        <button class="theme-opt" data-mode="light"><div class="swatch"><span style="background:#faf5ee"></span><span style="background:#b4501f;flex:.35"></span></div>Light</button>
+        <button class="theme-opt" data-mode="dark"><div class="swatch"><span style="background:#17110d"></span><span style="background:#e5803f;flex:.35"></span></div>Dark</button>
       </div>
     </div>
     <div class="group">
@@ -826,7 +830,7 @@ function bbLabel(date) {
 function itemHTML(i) {
   const d = daysUntil(i.expiry);
   const low = isLow(i), out = i.qty <= 0;
-  const color = out ? 'var(--red)' : low ? 'var(--amber)' : 'var(--green)';
+  const color = out ? 'var(--red)' : low ? 'var(--amber)' : 'var(--ok)';
   const bits = [];
   if (d !== null) {
     if (d < 0) bits.push(`<span class="stamp bad">Expired ${-d}d</span>`);
