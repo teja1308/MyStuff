@@ -5,45 +5,48 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
 <style>
   /* Layout: app shell — sticky header with storage tabs (Overview + one per place), bottom tab bar for sections.
-     Each place gets its own summary card; items sit on paper-lined shelves with a wood lip, shown as jars whose fill shows stock. */
+     Each place gets its own summary card; items sit on paper-lined shelves with a wood lip, shown as jars whose fill shows stock.
+     Colour: fall palette — rust orange accent, olive for good stock, mustard for low, burgundy for expired/out, beige and brown for surfaces and wood. */
   :root {
-    --bg: #e6dac7;          /* birch plywood */
-    --grain: rgb(120 84 40 / .07);
-    --surface: #fbf8f2;     /* shelf liner paper */
-    --sunken: #f1ebe0;
-    --ink: #2a2118;
-    --muted: #7a6c5c;
-    --line: #e7dfd2;
-    --line-strong: #cdbfa9;
-    --wood-hi: #c99d67;     /* shelf lip */
-    --wood-lo: #a57643;
-    --lid: #b8894f;
-    --basil: #6f4a2e;       /* accent: walnut brown (buttons, selection, in stock) */
-    --basil-ink: #ffffff;
-    --basil-soft: #efe2d0;
-    --turmeric: #a56400;    /* running low / expiring soon */
-    --turmeric-soft: #f7e7c6;
-    --tomato: #bb3a28;      /* expired / out */
-    --tomato-soft: #f8ddd6;
-    --shadow: 0 1px 2px rgb(60 40 20 / .06), 0 6px 18px rgb(60 40 20 / .07);
+    --bg: #efe5d6;          /* beige */
+    --grain: rgb(139 90 43 / .07);
+    --surface: #fbf7f0;     /* cream liner */
+    --sunken: #f3e9db;
+    --ink: #2b1d14;
+    --muted: #7b6553;
+    --line: #e8dccb;
+    --line-strong: #d2bb9c;
+    --wood-hi: #b07a45;     /* brown shelf lip */
+    --wood-lo: #8b5a2b;
+    --lid: #8b5a2b;
+    --accent: #b4461b;      /* rust orange: buttons, selection */
+    --accent-ink: #ffffff;
+    --accent-soft: #f6dfd1;
+    --olive: #5f6e34;       /* olive green: in stock, in use, all good */
+    --olive-soft: #e5e9d3;
+    --mustard: #9b7108;     /* mustard yellow: running low / use soon */
+    --mustard-soft: #f8ebc4;
+    --burgundy: #7c1f2b;    /* burgundy: expired / out */
+    --burgundy-soft: #f4dcdc;
+    --shadow: 0 1px 2px rgb(60 35 15 / .06), 0 6px 18px rgb(60 35 15 / .07);
     --display: "Young Serif", Georgia, "Times New Roman", serif;
     --sans: "Figtree", "Helvetica Neue", system-ui, sans-serif;
     --mono: "DM Mono", ui-monospace, Menlo, monospace;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #1c1610; --grain: rgb(255 220 170 / .025); --surface: #29221b; --sunken: #322a21; --ink: #f0e8dc; --muted: #ad9f8c;
-      --line: #3a3127; --line-strong: #54473a; --wood-hi: #6b4a2c; --wood-lo: #45301c; --lid: #8a6a44;
-      --basil: #d0a679; --basil-ink: #24170c; --basil-soft: #3a2b1c;
-      --turmeric: #ebb551; --turmeric-soft: #3a2d14; --tomato: #f08070; --tomato-soft: #3d201a;
+      --bg: #1c140e; --grain: rgb(255 210 160 / .025); --surface: #281e16; --sunken: #31261c; --ink: #f3e8da; --muted: #b5a08a;
+      --line: #3b2f24; --line-strong: #554536; --wood-hi: #7a5230; --wood-lo: #4e3219; --lid: #a0703f;
+      --accent: #e2733f; --accent-ink: #1f0d04; --accent-soft: #3e2216; --olive: #aab56c; --olive-soft: #2c2f19;
+      --mustard: #e8b84a; --mustard-soft: #3a2c10; --burgundy: #e38690; --burgundy-soft: #3f1c21;
       --shadow: 0 1px 2px rgb(0 0 0 / .35), 0 6px 18px rgb(0 0 0 / .25); color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #1c1610; --grain: rgb(255 220 170 / .025); --surface: #29221b; --sunken: #322a21; --ink: #f0e8dc; --muted: #ad9f8c;
-    --line: #3a3127; --line-strong: #54473a; --wood-hi: #6b4a2c; --wood-lo: #45301c; --lid: #8a6a44;
-    --basil: #d0a679; --basil-ink: #24170c; --basil-soft: #3a2b1c;
-    --turmeric: #ebb551; --turmeric-soft: #3a2d14; --tomato: #f08070; --tomato-soft: #3d201a;
+    --bg: #1c140e; --grain: rgb(255 210 160 / .025); --surface: #281e16; --sunken: #31261c; --ink: #f3e8da; --muted: #b5a08a;
+    --line: #3b2f24; --line-strong: #554536; --wood-hi: #7a5230; --wood-lo: #4e3219; --lid: #a0703f;
+    --accent: #e2733f; --accent-ink: #1f0d04; --accent-soft: #3e2216; --olive: #aab56c; --olive-soft: #2c2f19;
+    --mustard: #e8b84a; --mustard-soft: #3a2c10; --burgundy: #e38690; --burgundy-soft: #3f1c21;
     --shadow: 0 1px 2px rgb(0 0 0 / .35), 0 6px 18px rgb(0 0 0 / .25); color-scheme: dark;
   }
 
@@ -60,7 +63,7 @@
   .wrap { max-width: 680px; margin: 0 auto;
     padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   input, select, textarea, button { font: inherit; color: inherit; }
-  :focus-visible { outline: 2px solid var(--basil); outline-offset: 2px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .mono { font-family: var(--mono); }
 
   /* ---- header ---- */
@@ -82,12 +85,12 @@
   .loc-tab { flex: 1 0 auto; justify-content: center; display: flex; align-items: center; gap: 6px; border: 0; background: none; cursor: pointer;
     padding: 8px 5px 11px; border-bottom: 2.5px solid transparent; color: var(--muted); font-weight: 600; font-size: 14px; }
   .loc-tab:hover { color: var(--ink); }
-  .loc-tab.active { color: var(--ink); border-bottom-color: var(--basil); }
+  .loc-tab.active { color: var(--ink); border-bottom-color: var(--accent); }
   .loc-tab .n { font: 500 11px var(--mono); background: var(--sunken); border-radius: 6px; padding: 1px 6px; color: var(--muted); }
-  .loc-tab.active .n { background: var(--basil-soft); color: var(--basil); }
-  .loc-tab .alert { width: 7px; height: 7px; border-radius: 50%; background: var(--tomato); margin-left: -3px; }
+  .loc-tab.active .n { background: var(--accent-soft); color: var(--accent); }
+  .loc-tab .alert { width: 7px; height: 7px; border-radius: 50%; background: var(--burgundy); margin-left: -3px; }
   .count { font: 500 10px var(--mono); min-width: 17px; padding: 1px 4px; border-radius: 6px; text-align: center;
-    background: var(--tomato); color: var(--surface); }
+    background: var(--burgundy); color: var(--surface); }
 
   main .wrap { padding-block: 16px calc(100px + env(safe-area-inset-bottom, 0px)); }
   section { display: grid; gap: 14px; }
@@ -100,7 +103,7 @@
   .tabbar-inner { max-width: 680px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); }
   .tabbar button { border: 0; background: none; cursor: pointer; display: grid; justify-items: center; gap: 3px;
     padding: 9px 0 10px; font-size: 12px; font-weight: 600; color: var(--muted); }
-  .tabbar button.active { color: var(--basil); }
+  .tabbar button.active { color: var(--accent); }
   .tabbar .ico-wrap { position: relative; display: grid; }
   .tabbar .count { position: absolute; top: -5px; left: 15px; }
 
@@ -108,14 +111,14 @@
   .hero { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: grid; gap: 14px; box-shadow: var(--shadow); }
   .hero-top { display: flex; align-items: center; gap: 12px; }
   .place-ico { width: 46px; height: 46px; flex: none; border-radius: 14px; display: grid; place-items: center;
-    background: var(--basil-soft); color: var(--basil); }
+    background: var(--accent-soft); color: var(--accent); }
   .hero h2 { margin: 0; font: 400 24px/1.1 var(--display); }
   .hero .sub { color: var(--muted); font-size: 13px; margin-top: 3px; }
   .stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
   .stat { border: 1px solid transparent; background: var(--sunken); border-radius: 12px; padding: 9px 8px; cursor: pointer;
     text-align: left; display: grid; gap: 1px; min-width: 0; }
   .stat:hover { border-color: var(--line-strong); }
-  .stat.on { border-color: var(--basil); box-shadow: inset 0 0 0 1px var(--basil); background: var(--surface); }
+  .stat.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--surface); }
   .stat b { font: 400 22px/1.15 var(--display); font-variant-numeric: tabular-nums; }
   .stat { align-content: start; }
   .stat span { line-height: 1.2; font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px; white-space: normal; overflow-wrap: anywhere; }
@@ -139,9 +142,9 @@
   .store .pills { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
   .store .chev { color: var(--muted); }
   .pill { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--sunken); color: var(--muted); }
-  .pill.bad { background: var(--tomato-soft); color: var(--tomato); }
-  .pill.soon { background: var(--turmeric-soft); color: var(--turmeric); }
-  .pill.ok { background: var(--basil-soft); color: var(--basil); }
+  .pill.bad { background: var(--burgundy-soft); color: var(--burgundy); }
+  .pill.soon { background: var(--mustard-soft); color: var(--mustard); }
+  .pill.ok { background: var(--olive-soft); color: var(--olive); }
   .allgood { background: var(--surface); border: 1px dashed var(--line-strong); border-radius: 14px; padding: 16px; text-align: center; color: var(--muted); }
 
   /* ---- toolbar ---- */
@@ -157,15 +160,15 @@
   .btn { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 10px 16px;
     cursor: pointer; font-weight: 600; white-space: nowrap; }
   .btn:hover { border-color: var(--line-strong); }
-  .btn.primary { background: var(--basil); border-color: var(--basil); color: var(--basil-ink); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
   .btn.primary:hover { filter: brightness(1.06); }
   .btn.ghost { background: none; }
-  .btn.danger { color: var(--tomato); }
+  .btn.danger { color: var(--burgundy); }
   .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .grow { flex: 1 1 180px; min-width: 0; }
 
   .note { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; border-radius: 12px;
-    background: var(--basil-soft); font-size: 14px; }
+    background: var(--accent-soft); font-size: 14px; }
   .note p { margin: 0; flex: 1 1 200px; }
   .note .btn { padding: 6px 12px; font-size: 13px; }
 
@@ -203,10 +206,10 @@
   .stamp { font: 500 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 2px 6px; border-radius: 4px;
     border: 1px solid currentColor; line-height: 1.3; }
   .stamp.ok { color: var(--muted); border-color: var(--line-strong); }
-  .stamp.soon { color: var(--turmeric); background: var(--turmeric-soft); border-color: transparent; }
-  .stamp.bad { color: var(--tomato); background: var(--tomato-soft); border-color: transparent; }
-  .stamp.ex { color: var(--basil); background: var(--basil-soft); border-color: transparent; }
-  .stamp.use { color: var(--basil); border-color: var(--basil); }
+  .stamp.soon { color: var(--mustard); background: var(--mustard-soft); border-color: transparent; }
+  .stamp.bad { color: var(--burgundy); background: var(--burgundy-soft); border-color: transparent; }
+  .stamp.ex { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+  .stamp.use { color: var(--olive); border-color: var(--olive); }
 
   .stepper { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
   .stepper button { width: 34px; height: 34px; border: 0; background: none; cursor: pointer; border-radius: 50%; display: grid; place-items: center; color: var(--muted); }
@@ -223,12 +226,12 @@
     padding: 13px 2px; border-bottom: 1px solid var(--line); cursor: pointer; }
   .check input { appearance: none; width: 22px; height: 22px; border: 1.5px solid var(--line-strong); border-radius: 7px; margin: 0;
     display: grid; place-items: center; cursor: pointer; background: var(--surface); }
-  .check input:checked { background: var(--basil); border-color: var(--basil); }
-  .check input:checked::after { content: ""; width: 10px; height: 6px; border: 2px solid var(--basil-ink); border-top: 0; border-right: 0; rotate: -45deg; translate: 0 -1px; }
+  .check input:checked { background: var(--accent); border-color: var(--accent); }
+  .check input:checked::after { content: ""; width: 10px; height: 6px; border: 2px solid var(--accent-ink); border-top: 0; border-right: 0; rotate: -45deg; translate: 0 -1px; }
   .check .label { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-weight: 500; overflow-wrap: anywhere; }
   .check.done .label { color: var(--muted); text-decoration: line-through; }
   .link { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 13px; padding: 4px; }
-  .link:hover { color: var(--tomato); }
+  .link:hover { color: var(--burgundy); }
   .hint { color: var(--muted); font-size: 13px; margin: 0; }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
@@ -237,7 +240,7 @@
   .group h2 { margin: 0; font: 400 17px var(--display); }
   .themes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .theme-opt { border: 1px solid var(--line); border-radius: 12px; padding: 10px; background: var(--bg); cursor: pointer; display: grid; gap: 8px; font-size: 13px; font-weight: 600; text-align: left; }
-  .theme-opt.on { border-color: var(--basil); box-shadow: inset 0 0 0 1px var(--basil); }
+  .theme-opt.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
   .swatch { height: 34px; border-radius: 8px; border: 1px solid var(--line); display: flex; overflow: hidden; }
   .swatch span { flex: 1; }
 
@@ -262,13 +265,13 @@
   .cat-chip small { color: var(--muted); font: 500 11px var(--mono); }
   .cat-chip button { border: 0; background: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
     color: var(--muted); display: grid; place-items: center; font-size: 15px; line-height: 1; }
-  .cat-chip button:hover { color: var(--tomato); background: var(--tomato-soft); }
+  .cat-chip button:hover { color: var(--burgundy); background: var(--burgundy-soft); }
   .cat-chip.preview { padding-right: 12px; justify-self: start; }
   .form .check-row { display: flex; align-items: center; gap: 10px; font: 500 14px var(--sans); letter-spacing: 0;
     text-transform: none; color: var(--ink); padding: 4px 0; cursor: pointer; }
-  .form .check-row input { width: 20px; height: 20px; accent-color: var(--basil); margin: 0; flex: none; }
+  .form .check-row input { width: 20px; height: 20px; accent-color: var(--accent); margin: 0; flex: none; }
   .form .check-row small { color: var(--muted); font-size: 12.5px; font-weight: 400; }
-  .form .err { grid-column: 1 / -1; color: var(--tomato); font-size: 13px; margin: 0; min-height: 1em; }
+  .form .err { grid-column: 1 / -1; color: var(--burgundy); font-size: 13px; margin: 0; min-height: 1em; }
   .dlg-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
   textarea.field { min-height: 170px; font: 12px/1.45 var(--mono); resize: vertical; }
   @media (max-width: 520px) {
@@ -288,7 +291,7 @@
         <svg width="28" height="32" viewBox="0 0 28 32" aria-hidden="true">
           <rect x="6" y="1" width="16" height="5" rx="2" fill="var(--lid)"/>
           <rect x="2.75" y="7.75" width="22.5" height="22.5" rx="6" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
-          <rect x="5" y="17" width="18" height="11" rx="4" fill="var(--basil)" opacity=".85"/>
+          <rect x="5" y="17" width="18" height="11" rx="4" fill="var(--accent)" opacity=".85"/>
         </svg>
         <div>
           <h1>Pantry</h1>
@@ -315,9 +318,9 @@
       </div>
       <div class="stats" id="stats">
         <button class="stat" data-filter="all"><b id="statAll">0</b><span>Items</span></button>
-        <button class="stat" data-filter="expiring"><b id="statExp">0</b><span><i class="dot" style="background:var(--tomato)"></i>Use soon</span></button>
-        <button class="stat" data-filter="low"><b id="statLow">0</b><span><i class="dot" style="background:var(--turmeric)"></i>Low</span></button>
-        <button class="stat" data-filter="inuse"><b id="statUse">0</b><span><i class="dot" style="background:var(--basil)"></i>In use</span></button>
+        <button class="stat" data-filter="expiring"><b id="statExp">0</b><span><i class="dot" style="background:var(--burgundy)"></i>Use soon</span></button>
+        <button class="stat" data-filter="low"><b id="statLow">0</b><span><i class="dot" style="background:var(--mustard)"></i>Low</span></button>
+        <button class="stat" data-filter="inuse"><b id="statUse">0</b><span><i class="dot" style="background:var(--olive)"></i>In use</span></button>
         <button class="stat" data-filter="out"><b id="statOut">0</b><span><i class="dot" style="background:var(--line-strong)"></i>Out</span></button>
       </div>
       <div class="hero-actions">
@@ -358,9 +361,9 @@
     <div class="group">
       <h2>Appearance</h2>
       <div class="themes" id="themeOpts">
-        <button class="theme-opt" data-mode="system"><div class="swatch"><span style="background:#e6dac7"></span><span style="background:#1c1610"></span></div>System</button>
-        <button class="theme-opt" data-mode="light"><div class="swatch"><span style="background:#e6dac7"></span><span style="background:#a57643;flex:.35"></span></div>Birch</button>
-        <button class="theme-opt" data-mode="dark"><div class="swatch"><span style="background:#1c1610"></span><span style="background:#6b4a2c;flex:.35"></span></div>Walnut</button>
+        <button class="theme-opt" data-mode="system"><div class="swatch"><span style="background:#efe5d6"></span><span style="background:#1c140e"></span></div>System</button>
+        <button class="theme-opt" data-mode="light"><div class="swatch"><span style="background:#efe5d6"></span><span style="background:#b4461b;flex:.35"></span></div>Light</button>
+        <button class="theme-opt" data-mode="dark"><div class="swatch"><span style="background:#1c140e"></span><span style="background:#e2733f;flex:.35"></span></div>Dark</button>
       </div>
     </div>
     <div class="group">
@@ -854,7 +857,7 @@ function bbLabel(date) {
 function itemHTML(i) {
   const d = daysUntil(i.expiry);
   const low = isLow(i), out = i.qty <= 0;
-  const color = out ? 'var(--tomato)' : low ? 'var(--turmeric)' : 'var(--basil)';
+  const color = out ? 'var(--burgundy)' : low ? 'var(--mustard)' : 'var(--olive)';
   const bits = [];
   if (d !== null) {
     if (d < 0) bits.push(`<span class="stamp bad">Expired ${-d}d</span>`);
