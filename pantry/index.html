@@ -361,7 +361,7 @@
 const KEY = 'pantry.v1';
 const THEME_KEY = 'pantry.theme';
 const DEFAULT_LOCATIONS = ['Pantry', 'Fridge', 'Freezer'];
-const DEFAULT_CATEGORIES = ['Produce', 'Dairy', 'Meat & Fish', 'Bakery', 'Grains & Lentils', 'Pasta', 'Canned', 'Spices', 'Snacks', 'Drinks', 'Frozen', 'Household'];
+const DEFAULT_CATEGORIES = ['Produce', 'Dairy', 'Meat & Fish', 'Bakery', 'Grains & Lentils', 'Flours', 'International', 'Canned', 'Spices', 'Snacks', 'Drinks', 'Frozen', 'Household'];
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -402,9 +402,13 @@ function load() {
   try {
     const s = JSON.parse(localStorage.getItem(KEY));
     if (s && Array.isArray(s.items)) {
-      // Split the old "Grains & Pasta" category: pasta/noodles go to Pasta, everything else to Grains & Lentils
+      // Migrate older categories: "Grains & Pasta" was split, "Pasta" became International, flours got their own category
+      const isPasta = /pasta|spaghetti|noodle|macaroni|penne|ramen|vermicelli|fusilli/i;
+      const isFlour = /flour|atta|maida|besan|semolina|rava|suji/i;
       s.items.forEach(i => {
-        if (i.category === 'Grains & Pasta') i.category = /pasta|spaghetti|noodle|macaroni|penne|ramen|vermicelli|fusilli/i.test(i.name) ? 'Pasta' : 'Grains & Lentils';
+        if (i.category === 'Pasta') i.category = 'International';
+        if (i.category === 'Grains & Pasta') i.category = isPasta.test(i.name) ? 'International' : 'Grains & Lentils';
+        if (i.category === 'Grains & Lentils' && isFlour.test(i.name)) i.category = 'Flours';
       });
       return { locations: DEFAULT_LOCATIONS, shopping: [], ...s };
     }
@@ -481,7 +485,7 @@ const NAME_ICONS = [
   [/beer/, '🍺'], [/wine/, '🍷'], [/ice\b/, '🧊'],
   [/soap|detergent|cleaner|bleach|dish/, '🧼'], [/toilet|tissue|paper towel|napkin/, '🧻'], [/sponge/, '🧽'], [/shampoo|lotion/, '🧴'],
 ];
-const CATEGORY_ICONS = { produce: '🥬', dairy: '🧀', 'meat & fish': '🍗', bakery: '🍞', 'grains & lentils': '🌾', pasta: '🍝', canned: '🥫',
+const CATEGORY_ICONS = { produce: '🥬', dairy: '🧀', 'meat & fish': '🍗', bakery: '🍞', 'grains & lentils': '🫘', flours: '🌾', international: '🌏', canned: '🥫',
   spices: '🧂', snacks: '🍪', drinks: '🧃', frozen: '🧊', household: '🧼', oils: '🫗' };
 function autoIcon(name = '', category = '', location = '') {
   const n = name.toLowerCase();
@@ -762,7 +766,8 @@ function loadSample() {
     mk('Tomatoes', 6, 'pcs', 'Produce', 'Fridge', 5, 3),
     mk('Basmati rice', 2, 'kg', 'Grains & Lentils', 'Pantry', 200, 1),
     mk('Toor dal', 1, 'kg', 'Grains & Lentils', 'Pantry', 180, 1),
-    mk('Penne', 500, 'g', 'Pasta', 'Pantry', 300, 250),
+    mk('Penne', 500, 'g', 'International', 'Pantry', 300, 250),
+    mk('Atta', 5, 'kg', 'Flours', 'Pantry', 90, 1),
     mk('Chickpeas', 3, 'can', 'Canned', 'Pantry', 400, 2),
     mk('Olive oil', 0, 'bottle', 'Oils', 'Pantry', null, 1),
     mk('Frozen peas', 500, 'g', 'Frozen', 'Freezer', 120, 200),
