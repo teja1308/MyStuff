@@ -384,6 +384,12 @@
       <div class="actions"><button class="btn" id="addCatBtn2">Add category</button></div>
     </div>
     <div class="group">
+      <h2>Boxes</h2>
+      <p class="hint">Numbered boxes or containers you store things in. The number shows how many items are in each.</p>
+      <div class="cat-list" id="boxList"></div>
+      <div class="actions"><button class="btn" id="addBoxBtn">Add box</button></div>
+    </div>
+    <div class="group">
       <h2>Reset</h2>
       <div class="actions"><button class="btn" id="clearHistoryBtn2">Clear item name history</button><button class="btn danger" id="wipeBtn">Delete all data</button></div>
     </div>
@@ -408,10 +414,11 @@
       <label>Unit<input id="fUnit" class="field" name="unit" placeholder="pcs, kg, L" list="units"></label>
       <label>Category<select id="fCat" class="field" name="category"></select></label>
       <label>Stored in<select id="fLoc" class="field" name="location"></select></label>
+      <label>Box number<select id="fBox" class="field" name="box"></select></label>
       <label>Best before<input id="fExp" class="field" name="expiry" type="date"></label>
       <label>Low at<input id="fLow" class="field" name="low" type="number" min="0" step="any" placeholder="1"></label>
-      <label>Notes<input id="fNotes" class="field" name="notes"></label>
       <label>Icon<input id="fIcon" class="field" name="icon" maxlength="8" placeholder="Auto"></label>
+      <label class="full">Notes<input id="fNotes" class="field" name="notes"></label>
       <label class="full check-row"><input type="checkbox" id="fInUse" name="inuse"> In use <small>Opened and being used up</small></label>
     </div>
     <div class="dlg-actions">
@@ -436,6 +443,20 @@
     <div class="dlg-actions" style="justify-content:flex-end">
       <button type="button" class="btn" id="catCancel">Cancel</button>
       <button type="submit" class="btn primary">Add category</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="boxDialog">
+  <form id="boxDlgForm" autocomplete="off">
+    <h3>Add box</h3>
+    <div class="form">
+      <label class="full">Box name or number<input id="bName" class="field" name="bname" required maxlength="30" placeholder="e.g. 4 or Top shelf A"></label>
+      <p class="err" id="bError" role="alert"></p>
+    </div>
+    <div class="dlg-actions" style="justify-content:flex-end">
+      <button type="button" class="btn" id="boxCancel">Cancel</button>
+      <button type="submit" class="btn primary">Add box</button>
     </div>
   </form>
 </dialog>
@@ -466,6 +487,8 @@
 const KEY = 'pantry.v1';
 const THEME_KEY = 'pantry.theme';
 const DEFAULT_LOCATIONS = ['Pantry', 'Fridge', 'Freezer'];
+// Natural order so "Box 10" comes after "Box 9"
+const sortBoxes = (list) => [...new Set(list)].sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
 const sortCats = (list) => [...new Set(list)].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 const DEFAULT_CATEGORIES = sortCats(['Produce', 'Dairy', 'Meat & Fish', 'Bakery', 'Grains & Lentils', 'Flours', 'Oils', 'Masalas', 'Spices', 'International',
   'Canned', 'Snacks', 'Drinks', 'Frozen', 'Household', 'Toiletries', 'Dog Food', 'Dog Snacks', 'Dog Treats', 'General', 'Miscellaneous']);
@@ -551,6 +574,7 @@ function normalize(s) {
     categories: sortCats(s.categories || [...DEFAULT_CATEGORIES, ...items.map(i => i.category).filter(Boolean)]),
     history: s.history || [...new Set(items.map(i => i.name))],
     catIcons: s.catIcons || {},
+    boxes: sortBoxes(s.boxes || ['Box 1', 'Box 2', 'Box 3', ...items.map(i => i.box).filter(Boolean)]),
   };
 }
 function remember(name) {
@@ -683,6 +707,12 @@ function render() {
     return `<span class="cat-chip">${esc(catIcon(c) || '🏷️')} ${esc(c)}${n ? ` <small>${n}</small>` : ''}<button type="button" aria-label="Remove ${esc(c)}" title="Remove ${esc(c)}" data-cat="${esc(c)}">×</button></span>`;
   }).join('') || '<p class="hint">No categories yet.</p>';
   $('#catList').querySelectorAll('[data-cat]').forEach(b => b.onclick = () => removeCategory(b.dataset.cat));
+  fillBoxSelect();
+  $('#boxList').innerHTML = state.boxes.map(x => {
+    const n = state.items.filter(i => i.box === x).length;
+    return `<span class="cat-chip">📦 ${esc(x)}${n ? ` <small>${n}</small>` : ''}<button type="button" aria-label="Remove ${esc(x)}" title="Remove ${esc(x)}" data-box="${esc(x)}">×</button></span>`;
+  }).join('') || '<p class="hint">No boxes yet.</p>';
+  $('#boxList').querySelectorAll('[data-box]').forEach(b => b.onclick = () => removeBox(b.dataset.box));
   $('#locInput').value = state.locations.join(', ');
   if (view.loc && !state.locations.includes(view.loc)) view.loc = '';
 
@@ -745,7 +775,7 @@ function renderStock() {
 
   const q = $('#search').value.trim().toLowerCase();
   const items = placeItems.filter(i =>
-    (!q || [i.name, i.category, i.notes].some(v => (v || '').toLowerCase().includes(q))) && STATUS[view.status](i));
+    (!q || [i.name, i.category, i.notes, i.box].some(v => (v || '').toLowerCase().includes(q))) && STATUS[view.status](i));
   const byName = (a, b) => a.name.localeCompare(b.name);
 
   // Overview at rest: one card per place, then everything that needs attention
@@ -814,7 +844,7 @@ function itemHTML(i) {
   if (out) bits.push(`<span class="stamp bad">Out</span>`);
   else if (low) bits.push(`<span class="stamp soon">Low</span>`);
   if (i.sample) bits.push(`<span class="stamp ex">Example</span>`);
-  const context = [!view.loc && i.location, (!view.loc || view.sort !== 'category') && i.category, i.notes].filter(Boolean).map(esc).join(' <i>/</i> ');
+  const context = [!view.loc && i.location, i.box && '📦 ' + i.box, (!view.loc || view.sort !== 'category') && i.category, i.notes].filter(Boolean).map(esc).join(' <i>/</i> ');
   if (context) bits.push(`<span>${context}</span>`);
   const step = /^(g|ml)$/i.test(i.unit || '') ? 100 : 1;
   return `<div class="item">
@@ -859,6 +889,7 @@ function openItem(id) {
   $('#dialogTitle').textContent = i ? 'Edit item' : 'Add item';
   $('#deleteItemBtn').hidden = !i;
   fillCategorySelect(i?.category);
+  fillBoxSelect(i?.box ?? '');
   if (i) for (const k of ['name', 'qty', 'unit', 'category', 'location', 'expiry', 'low', 'notes', 'icon']) f[k].value = i[k] ?? '';
   else if (view.loc) f.location.value = view.loc;
   f.inuse.checked = !!i?.opened;
@@ -872,7 +903,7 @@ $('#itemForm').addEventListener('submit', (e) => {
   const f = e.target;
   const data = {
     name: f.name.value.trim(), qty: Number(f.qty.value) || 0, unit: f.unit.value.trim(),
-    category: f.category.value, location: f.location.value, expiry: f.expiry.value,
+    category: f.category.value, box: f.box.value, location: f.location.value, expiry: f.expiry.value,
     low: f.low.value === '' ? '' : Number(f.low.value), notes: f.notes.value.trim(), icon: f.icon.value.trim(),
   };
   if (!data.name) return;
@@ -914,6 +945,54 @@ $('#fCat').addEventListener('change', (e) => {
   sel.value = sel.dataset.prev || '';
   openCategoryDialog((name) => { fillCategorySelect(name); updateIconPreview(); });
 });
+
+// Box dropdown from the user's list; keeps an item's current box even if it was removed from the list
+function fillBoxSelect(extra) {
+  const sel = $('#fBox'), cur = extra ?? sel.value;
+  const boxes = cur && cur !== '__new' && !state.boxes.includes(cur) ? sortBoxes([...state.boxes, cur]) : state.boxes;
+  sel.innerHTML = '<option value="">No box</option>' + boxes.map(x => `<option>${esc(x)}</option>`).join('')
+    + '<option value="__new">+ New box…</option>';
+  sel.value = cur && cur !== '__new' ? cur : '';
+  sel.dataset.prev = sel.value;
+}
+$('#fBox').addEventListener('change', (e) => {
+  const sel = e.target;
+  if (sel.value !== '__new') { sel.dataset.prev = sel.value; return; }
+  sel.value = sel.dataset.prev || '';
+  openBoxDialog((name) => fillBoxSelect(name));
+});
+let boxDone = null;
+function openBoxDialog(onDone) {
+  boxDone = onDone || null;
+  $('#boxDlgForm').reset(); $('#bError').textContent = '';
+  // Suggest the next number after the highest numbered box
+  const nums = state.boxes.map(x => +(x.match(/(\d+)\s*$/) || [])[1]).filter(n => !isNaN(n));
+  $('#bName').value = 'Box ' + ((nums.length ? Math.max(...nums) : 0) + 1);
+  $('#boxDialog').showModal();
+  $('#bName').select();
+}
+$('#bName').addEventListener('input', () => $('#bError').textContent = '');
+$('#boxCancel').onclick = () => $('#boxDialog').close();
+$('#boxDlgForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  let name = $('#bName').value.trim().replace(/\s+/g, ' ');
+  if (!name) return;
+  if (/^\d+$/.test(name)) name = 'Box ' + name;
+  const existing = state.boxes.find(x => x.toLowerCase() === name.toLowerCase());
+  if (existing) { $('#bError').textContent = `${existing} already exists.`; return; }
+  state.boxes = sortBoxes([...state.boxes, name]);
+  $('#boxDialog').close();
+  save(); toast('Added ' + name);
+  boxDone?.(name); boxDone = null;
+});
+async function removeBox(box) {
+  const used = state.items.filter(i => i.box === box);
+  if (used.length && !(await ask(`${plural(used.length, 'item')} ${used.length > 1 ? 'are' : 'is'} in ${box}. Remove it? ${used.length > 1 ? 'They' : 'It'} will have no box.`, 'Remove'))) return;
+  used.forEach(i => i.box = '');
+  state.boxes = state.boxes.filter(x => x !== box);
+  save(); toast('Removed ' + box);
+}
+$('#addBoxBtn').onclick = () => openBoxDialog();
 
 // ---- add category dialog (from Stock, Settings, or the item form) ----
 let catDone = null;
@@ -1055,9 +1134,9 @@ function loadSample() {
     mk('Spinach', 1, 'pack', 'Produce', 'Fridge', -1, ''),
     mk('Tomatoes', 6, 'pcs', 'Produce', 'Fridge', 5, 3),
     mk('Basmati rice', 2, 'kg', 'Grains & Lentils', 'Pantry', 200, 1, 12),
-    mk('Toor dal', 1, 'kg', 'Grains & Lentils', 'Pantry', 180, 1),
+    { ...mk('Toor dal', 1, 'kg', 'Grains & Lentils', 'Pantry', 180, 1), box: 'Box 2' },
     mk('Penne', 500, 'g', 'International', 'Pantry', 300, 250),
-    mk('Atta', 5, 'kg', 'Flours', 'Pantry', 90, 1, 5),
+    { ...mk('Atta', 5, 'kg', 'Flours', 'Pantry', 90, 1, 5), box: 'Box 1' },
     mk('Chickpeas', 3, 'can', 'Canned', 'Pantry', 400, 2),
     mk('Olive oil', 0, 'bottle', 'Oils', 'Pantry', null, 1),
     mk('Frozen peas', 500, 'g', 'Frozen', 'Freezer', 120, 200),
