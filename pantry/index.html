@@ -2,48 +2,41 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
 <style>
-  /* Layout: clean app shell (pill place tabs, card groups, bottom tab bar) in the birch/walnut palette:
-     birch background, paper cards, walnut-brown accent, turmeric for low, tomato for expired/out.
-     Items keep the jar icon whose fill level shows stock. */
+  /* Layout: fresh, light app shell in the style of current pantry apps (Smart Pantry, NoWaste, KitchenPal):
+     sage-tinted background, white cards, one deep fresh green, pill buttons, plain sans type.
+     Sticky header with storage-place tabs, per-place summary card, item rows with an icon tile and stock bar, bottom tab bar. */
   :root {
-    --bg: #e6dac7;          /* birch plywood */
-    --surface: #fbf8f2;     /* shelf liner paper */
-    --sunken: #f1ebe0;
-    --ink: #2a2118;
-    --muted: #7a6c5c;
-    --line: #e7dfd2;
-    --line-strong: #cdbfa9;
-    --wood-hi: #c99d67;     /* shelf lip */
-    --wood-lo: #a57643;
-    --lid: #b8894f;
-    --accent: #6f4a2e;      /* walnut brown: buttons, selection, in stock */
-    --accent-ink: #ffffff;
-    --accent-soft: #efe2d0;
-    --turmeric: #a56400;    /* running low / expiring soon */
-    --turmeric-soft: #f7e7c6;
-    --tomato: #bb3a28;      /* expired / out */
-    --tomato-soft: #f8ddd6;
-    --shadow: 0 1px 2px rgb(60 40 20 / .06), 0 6px 18px rgb(60 40 20 / .07);
-    --sans: "Figtree", "Helvetica Neue", system-ui, sans-serif;
+    --bg: #f5f7f2;
+    --surface: #ffffff;
+    --sunken: #eef2ec;
+    --ink: #101820;
+    --muted: #5d6772;
+    --line: #e2e7df;
+    --line-strong: #cbd3c8;
+    --green: #0d7f4e;
+    --green-ink: #ffffff;
+    --green-soft: #e2f2e9;
+    --amber: #b25e00;
+    --amber-soft: #fdf0d9;
+    --red: #c0392b;
+    --red-soft: #fce6e3;
+    --shadow: 0 1px 2px rgb(16 24 32 / .04), 0 4px 14px rgb(16 24 32 / .05);
+    --sans: "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
     --emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #1c1610; --surface: #29221b; --sunken: #322a21; --ink: #f0e8dc; --muted: #ad9f8c;
-      --line: #3a3127; --line-strong: #54473a; --wood-hi: #6b4a2c; --wood-lo: #45301c; --lid: #8a6a44;
-      --accent: #d0a679; --accent-ink: #24170c; --accent-soft: #3a2b1c;
-      --turmeric: #ebb551; --turmeric-soft: #3a2d14; --tomato: #f08070; --tomato-soft: #3d201a;
-      --shadow: 0 1px 2px rgb(0 0 0 / .35), 0 6px 18px rgb(0 0 0 / .25); color-scheme: dark;
+      --bg: #0e1311; --surface: #161c19; --sunken: #1d2521; --ink: #e8eeea; --muted: #97a39c; --line: #252e29; --line-strong: #34403a;
+      --green: #3fbf83; --green-ink: #06140d; --green-soft: #15301f; --amber: #f0b44c; --amber-soft: #33270f; --red: #f0806f; --red-soft: #3a1c18;
+      --shadow: 0 1px 2px rgb(0 0 0 / .3); color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #1c1610; --surface: #29221b; --sunken: #322a21; --ink: #f0e8dc; --muted: #ad9f8c;
-    --line: #3a3127; --line-strong: #54473a; --wood-hi: #6b4a2c; --wood-lo: #45301c; --lid: #8a6a44;
-    --accent: #d0a679; --accent-ink: #24170c; --accent-soft: #3a2b1c;
-    --turmeric: #ebb551; --turmeric-soft: #3a2d14; --tomato: #f08070; --tomato-soft: #3d201a;
-    --shadow: 0 1px 2px rgb(0 0 0 / .35), 0 6px 18px rgb(0 0 0 / .25); color-scheme: dark;
+    --bg: #0e1311; --surface: #161c19; --sunken: #1d2521; --ink: #e8eeea; --muted: #97a39c; --line: #252e29; --line-strong: #34403a;
+    --green: #3fbf83; --green-ink: #06140d; --green-soft: #15301f; --amber: #f0b44c; --amber-soft: #33270f; --red: #f0806f; --red-soft: #3a1c18;
+    --shadow: 0 1px 2px rgb(0 0 0 / .3); color-scheme: dark;
   }
 
   * { box-sizing: border-box; }
@@ -54,7 +47,7 @@
   .wrap { max-width: 680px; margin: 0 auto;
     padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   input, select, textarea, button { font: inherit; color: inherit; }
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  :focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
 
   /* ---- header ---- */
   header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--bg) 90%, transparent);
@@ -74,12 +67,12 @@
     border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 7px 11px;
     color: var(--muted); font-weight: 600; font-size: 13.5px; }
   .loc-tab:hover { border-color: var(--line-strong); color: var(--ink); }
-  .loc-tab.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .loc-tab.active { background: var(--green); border-color: var(--green); color: var(--green-ink); }
   .loc-tab .n { font-size: 12px; font-weight: 700; opacity: .7; font-variant-numeric: tabular-nums; }
-  .loc-tab .alert { width: 7px; height: 7px; border-radius: 50%; background: var(--tomato); }
-  .loc-tab.active .alert { background: var(--accent-ink); }
+  .loc-tab .alert { width: 7px; height: 7px; border-radius: 50%; background: var(--red); }
+  .loc-tab.active .alert { background: var(--green-ink); }
   .count { font-size: 10px; font-weight: 700; min-width: 17px; padding: 1px 4px; border-radius: 999px; text-align: center;
-    background: var(--tomato); color: #fff; line-height: 1.5; }
+    background: var(--red); color: #fff; line-height: 1.5; }
 
   main .wrap { padding-block: 6px calc(100px + env(safe-area-inset-bottom, 0px)); }
   section { display: grid; gap: 14px; }
@@ -92,7 +85,7 @@
   .tabbar-inner { max-width: 680px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); }
   .tabbar button { border: 0; background: none; cursor: pointer; display: grid; justify-items: center; gap: 3px;
     padding: 9px 0 10px; font-size: 12px; font-weight: 600; color: var(--muted); }
-  .tabbar button.active { color: var(--accent); }
+  .tabbar button.active { color: var(--green); }
   .tabbar .ico-wrap { position: relative; display: grid; }
   .tabbar .count { position: absolute; top: -5px; left: 15px; }
 
@@ -100,21 +93,21 @@
   .hero { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 16px; display: grid; gap: 14px; box-shadow: var(--shadow); }
   .hero-top { display: flex; align-items: center; gap: 12px; }
   .place-ico { width: 46px; height: 46px; flex: none; border-radius: 14px; display: grid; place-items: center;
-    background: var(--accent-soft); color: var(--accent); }
+    background: var(--green-soft); color: var(--green); }
   .hero h2 { margin: 0; font-size: 21px; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; }
   .hero .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
   .stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
   .stat { border: 1px solid transparent; background: var(--sunken); border-radius: 14px; padding: 10px 8px; cursor: pointer;
     text-align: left; display: grid; gap: 2px; align-content: start; min-width: 0; }
   .stat:hover { border-color: var(--line-strong); }
-  .stat.on { border-color: var(--accent); background: var(--accent-soft); }
+  .stat.on { border-color: var(--green); background: var(--green-soft); }
   .stat b { font-size: 21px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; font-variant-numeric: tabular-nums; }
   .stat span { font-size: 11px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 4px;
     line-height: 1.2; white-space: normal; overflow-wrap: anywhere; }
   .stat .dot { display: none; }
-  .stat[data-filter="expiring"] b { color: var(--tomato); }
-  .stat[data-filter="low"] b { color: var(--turmeric); }
-  .stat[data-filter="inuse"] b { color: var(--accent); }
+  .stat[data-filter="expiring"] b { color: var(--red); }
+  .stat[data-filter="low"] b { color: var(--amber); }
+  .stat[data-filter="inuse"] b { color: var(--green); }
   .stat.zero b { color: var(--line-strong); }
   .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
   .hero-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
@@ -134,9 +127,9 @@
   .store .pills { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
   .store .chev { color: var(--muted); }
   .pill { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--sunken); color: var(--muted); }
-  .pill.bad { background: var(--tomato-soft); color: var(--tomato); }
-  .pill.soon { background: var(--turmeric-soft); color: var(--turmeric); }
-  .pill.ok { background: var(--accent-soft); color: var(--accent); }
+  .pill.bad { background: var(--red-soft); color: var(--red); }
+  .pill.soon { background: var(--amber-soft); color: var(--amber); }
+  .pill.ok { background: var(--green-soft); color: var(--green); }
   .allgood { background: var(--surface); border: 1px dashed var(--line-strong); border-radius: 16px; padding: 18px; text-align: center; color: var(--muted); }
 
   /* ---- toolbar & controls ---- */
@@ -144,7 +137,7 @@
   .search svg { position: absolute; left: 13px; top: 50%; translate: 0 -50%; color: var(--muted); pointer-events: none; }
   .field { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; min-width: 0; }
   .field:hover { border-color: var(--line-strong); }
-  .field:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+  .field:focus { border-color: var(--green); outline: none; box-shadow: 0 0 0 3px var(--green-soft); }
   .search .field { padding-left: 38px; border-radius: 999px; }
   .toolbar { display: flex; gap: 8px; }
   .toolbar .search { flex: 1 1 auto; min-width: 0; }
@@ -152,14 +145,14 @@
   .btn { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 10px 18px;
     cursor: pointer; font-weight: 700; font-size: 14px; white-space: nowrap; }
   .btn:hover { border-color: var(--line-strong); background: var(--sunken); }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-  .btn.primary:hover { filter: brightness(1.08); background: var(--accent); }
+  .btn.primary { background: var(--green); border-color: var(--green); color: var(--green-ink); }
+  .btn.primary:hover { filter: brightness(1.08); background: var(--green); }
   .btn.ghost { background: none; }
-  .btn.danger { color: var(--tomato); }
+  .btn.danger { color: var(--red); }
   .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .grow { flex: 1 1 180px; min-width: 0; }
   .note { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; border-radius: 14px;
-    background: var(--accent-soft); font-size: 14px; }
+    background: var(--green-soft); font-size: 14px; }
   .note p { margin: 0; flex: 1 1 200px; }
   .note .btn { padding: 6px 14px; font-size: 13px; }
 
@@ -175,25 +168,21 @@
   .item .name { font-weight: 700; font-size: 15px; overflow-wrap: anywhere; }
   .item .meta { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
   .item .meta i { font-style: normal; color: var(--line-strong); }
-  .jar { position: relative; width: 44px; height: 50px; flex: none; cursor: pointer; }
-  .jar::before { content: ""; position: absolute; left: 8px; right: 8px; top: 0; height: 7px; border-radius: 3px 3px 2px 2px;
-    background: var(--lid); box-shadow: inset 0 -2px 0 rgb(0 0 0 / .12); z-index: 1; }
-  .jar .glass { position: absolute; inset: 6px 0 0; border: 1.5px solid var(--line-strong); border-radius: 9px 9px 12px 12px;
-    overflow: hidden; background: var(--sunken); }
-  .jar .fill { position: absolute; left: 0; right: 0; bottom: 0; height: var(--f);
-    background: color-mix(in srgb, var(--c) 30%, transparent); border-top: 2px solid var(--c); }
-  .jar .ico { position: absolute; inset: 6px 0 0; display: grid; place-items: center; font-size: 22px; line-height: 1;
-    font-family: var(--emoji); }
-  @media (prefers-reduced-motion: no-preference) { .jar .fill { transition: height .35s ease; } }
+  /* icon tile with a stock bar along the bottom (--f = level, --c = status colour) */
+  .jar { position: relative; width: 48px; height: 48px; flex: none; cursor: pointer; border-radius: 14px; background: var(--sunken); overflow: hidden; }
+  .jar .ico { position: absolute; inset: 0 0 6px; display: grid; place-items: center; font-size: 24px; line-height: 1; font-family: var(--emoji); }
+  .jar .glass { position: absolute; left: 8px; right: 8px; bottom: 6px; height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+  .jar .fill { height: 100%; width: var(--f); background: var(--c); border-radius: 2px; }
+  @media (prefers-reduced-motion: no-preference) { .jar .fill { transition: width .3s ease; } }
   .stamp { font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; line-height: 1.35; background: var(--sunken); color: var(--muted); }
   .stamp.ok { background: var(--sunken); color: var(--muted); }
-  .stamp.soon { background: var(--turmeric-soft); color: var(--turmeric); }
-  .stamp.bad { background: var(--tomato-soft); color: var(--tomato); }
+  .stamp.soon { background: var(--amber-soft); color: var(--amber); }
+  .stamp.bad { background: var(--red-soft); color: var(--red); }
   .stamp.ex { background: transparent; color: var(--muted); border: 1px dashed var(--line-strong); }
-  .stamp.use { background: var(--accent-soft); color: var(--accent); }
+  .stamp.use { background: var(--green-soft); color: var(--green); }
   .stepper { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
-  .stepper button { width: 34px; height: 34px; border: 0; background: none; cursor: pointer; border-radius: 50%; display: grid; place-items: center; color: var(--accent); }
-  .stepper button:hover { background: var(--accent-soft); }
+  .stepper button { width: 34px; height: 34px; border: 0; background: none; cursor: pointer; border-radius: 50%; display: grid; place-items: center; color: var(--green); }
+  .stepper button:hover { background: var(--green-soft); }
   .stepper .n { min-width: 52px; text-align: center; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .stepper .n small { color: var(--muted); font-size: 11.5px; font-weight: 600; margin-left: 2px; }
   .empty { text-align: center; padding: 44px 16px; color: var(--muted); display: grid; gap: 14px; justify-items: center; }
@@ -208,12 +197,12 @@
   .check:last-child { border-bottom: 0; }
   .check input { appearance: none; width: 22px; height: 22px; border: 1.5px solid var(--line-strong); border-radius: 50%; margin: 0;
     display: grid; place-items: center; cursor: pointer; background: var(--surface); }
-  .check input:checked { background: var(--accent); border-color: var(--accent); }
-  .check input:checked::after { content: ""; width: 10px; height: 6px; border: 2px solid var(--accent-ink); border-top: 0; border-right: 0; rotate: -45deg; translate: 0 -1px; }
+  .check input:checked { background: var(--green); border-color: var(--green); }
+  .check input:checked::after { content: ""; width: 10px; height: 6px; border: 2px solid var(--green-ink); border-top: 0; border-right: 0; rotate: -45deg; translate: 0 -1px; }
   .check .label { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-weight: 600; overflow-wrap: anywhere; }
   .check.done .label { color: var(--muted); text-decoration: line-through; }
   .link { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 13px; padding: 4px; font-weight: 600; }
-  .link:hover { color: var(--tomato); }
+  .link:hover { color: var(--red); }
   .hint { color: var(--muted); font-size: 13px; margin: 0; }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
@@ -222,7 +211,7 @@
   .group h2 { margin: 0; font-size: 16px; font-weight: 800; letter-spacing: -.01em; }
   .themes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .theme-opt { border: 1px solid var(--line); border-radius: 14px; padding: 10px; background: var(--bg); cursor: pointer; display: grid; gap: 8px; font-size: 13px; font-weight: 700; text-align: left; }
-  .theme-opt.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .theme-opt.on { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
   .swatch { height: 34px; border-radius: 9px; border: 1px solid var(--line); display: flex; overflow: hidden; }
   .swatch span { flex: 1; }
   .cat-list { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -231,7 +220,7 @@
   .cat-chip small { color: var(--muted); font-size: 11.5px; font-weight: 700; }
   .cat-chip button { border: 0; background: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
     color: var(--muted); display: grid; place-items: center; font-size: 15px; line-height: 1; }
-  .cat-chip button:hover { color: var(--tomato); background: var(--tomato-soft); }
+  .cat-chip button:hover { color: var(--red); background: var(--red-soft); }
   .cat-chip.preview { padding-right: 12px; justify-self: start; }
 
   /* ---- dialogs ---- */
@@ -250,9 +239,9 @@
   .label-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
   .label-row .link { font-size: 12px; padding: 0; }
   .form .check-row { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--ink); padding: 4px 0; cursor: pointer; }
-  .form .check-row input { width: 20px; height: 20px; accent-color: var(--accent); margin: 0; flex: none; }
+  .form .check-row input { width: 20px; height: 20px; accent-color: var(--green); margin: 0; flex: none; }
   .form .check-row small { color: var(--muted); font-size: 12.5px; font-weight: 500; }
-  .form .err { grid-column: 1 / -1; color: var(--tomato); font-size: 13px; margin: 0; min-height: 1em; }
+  .form .err { grid-column: 1 / -1; color: var(--red); font-size: 13px; margin: 0; min-height: 1em; }
   .dlg-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
   textarea.field { min-height: 170px; font: 12px/1.45 ui-monospace, Menlo, monospace; resize: vertical; }
   @media (max-width: 520px) {
@@ -267,10 +256,11 @@
   <div class="wrap">
     <div class="top">
       <div class="brand">
-        <svg width="28" height="32" viewBox="0 0 28 32" aria-hidden="true">
-          <rect x="6" y="1" width="16" height="5" rx="2" fill="var(--lid)"/>
-          <rect x="2.75" y="7.75" width="22.5" height="22.5" rx="6" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
-          <rect x="5" y="17" width="18" height="11" rx="4" fill="var(--accent)" opacity=".9"/>
+        <svg width="38" height="38" viewBox="0 0 38 38" aria-hidden="true">
+          <rect width="38" height="38" rx="11" fill="var(--green)"/>
+          <rect x="14" y="8" width="10" height="4" rx="1.5" fill="var(--green-ink)"/>
+          <rect x="10.75" y="13.75" width="16.5" height="16.5" rx="4.5" fill="none" stroke="var(--green-ink)" stroke-width="1.8"/>
+          <rect x="13" y="21" width="12" height="7" rx="2.5" fill="var(--green-ink)"/>
         </svg>
         <div>
           <h1>Pantry</h1>
@@ -297,9 +287,9 @@
       </div>
       <div class="stats" id="stats">
         <button class="stat" data-filter="all"><b id="statAll">0</b><span>Items</span></button>
-        <button class="stat" data-filter="expiring"><b id="statExp">0</b><span><i class="dot" style="background:var(--tomato)"></i>Use soon</span></button>
-        <button class="stat" data-filter="low"><b id="statLow">0</b><span><i class="dot" style="background:var(--turmeric)"></i>Low</span></button>
-        <button class="stat" data-filter="inuse"><b id="statUse">0</b><span><i class="dot" style="background:var(--accent)"></i>In use</span></button>
+        <button class="stat" data-filter="expiring"><b id="statExp">0</b><span><i class="dot" style="background:var(--red)"></i>Use soon</span></button>
+        <button class="stat" data-filter="low"><b id="statLow">0</b><span><i class="dot" style="background:var(--amber)"></i>Low</span></button>
+        <button class="stat" data-filter="inuse"><b id="statUse">0</b><span><i class="dot" style="background:var(--green)"></i>In use</span></button>
         <button class="stat" data-filter="out"><b id="statOut">0</b><span><i class="dot" style="background:var(--line-strong)"></i>Out</span></button>
       </div>
       <div class="hero-actions">
@@ -340,9 +330,9 @@
     <div class="group">
       <h2>Appearance</h2>
       <div class="themes" id="themeOpts">
-        <button class="theme-opt" data-mode="system"><div class="swatch"><span style="background:#e6dac7"></span><span style="background:#1c1610"></span></div>System</button>
-        <button class="theme-opt" data-mode="light"><div class="swatch"><span style="background:#e6dac7"></span><span style="background:#a57643;flex:.35"></span></div>Birch</button>
-        <button class="theme-opt" data-mode="dark"><div class="swatch"><span style="background:#1c1610"></span><span style="background:#6b4a2c;flex:.35"></span></div>Walnut</button>
+        <button class="theme-opt" data-mode="system"><div class="swatch"><span style="background:#f5f7f2"></span><span style="background:#0e1311"></span></div>System</button>
+        <button class="theme-opt" data-mode="light"><div class="swatch"><span style="background:#f5f7f2"></span><span style="background:#0d7f4e;flex:.35"></span></div>Light</button>
+        <button class="theme-opt" data-mode="dark"><div class="swatch"><span style="background:#0e1311"></span><span style="background:#3fbf83;flex:.35"></span></div>Dark</button>
       </div>
     </div>
     <div class="group">
@@ -836,7 +826,7 @@ function bbLabel(date) {
 function itemHTML(i) {
   const d = daysUntil(i.expiry);
   const low = isLow(i), out = i.qty <= 0;
-  const color = out ? 'var(--tomato)' : low ? 'var(--turmeric)' : 'var(--accent)';
+  const color = out ? 'var(--red)' : low ? 'var(--amber)' : 'var(--green)';
   const bits = [];
   if (d !== null) {
     if (d < 0) bits.push(`<span class="stamp bad">Expired ${-d}d</span>`);
